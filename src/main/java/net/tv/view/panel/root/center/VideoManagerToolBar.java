@@ -177,7 +177,7 @@ public class VideoManagerToolBar extends JPanel {
             GroupItemListPanel groupItemListPanel = GodHand.get(GodHand.K.GroupItemListPanel);
             GroupItemListPanel.ItemPanel itemPanel = groupItemListPanel.customizeList.getSelectedValue();
             GodHand.<PlaylistService>exec(GodHand.K.PlaylistService, playlistService -> playlistService.addOrUpdate(playViewItem));
-            refresh(groupItemListPanel, itemPanel);
+            refresh(itemPanel);
         }));
 
         videoToolBar.add(new SimpleButton("更新", Icons.Standard.FILE_SAVE, (e, btn) -> {
@@ -189,7 +189,7 @@ public class VideoManagerToolBar extends JPanel {
                 if (itemPanel == null) return;
                 playViewItem.setId(itemPanel.getPlayViewItem().getId());
                 GodHand.<PlaylistService>exec(GodHand.K.PlaylistService, playlistService -> playlistService.addOrUpdate(playViewItem));
-                refresh(groupItemListPanel, itemPanel);
+                refresh(itemPanel);
             });
         }));
 
@@ -201,7 +201,7 @@ public class VideoManagerToolBar extends JPanel {
                     if (itemPanel.getPlayViewItem() == null) return;
                     playlistService.delete(itemPanel.getPlayViewItem());
                 });
-                refresh(groupItemListPanel, itemPanel);
+                refresh(itemPanel);
             });
         }));
 
@@ -217,15 +217,14 @@ public class VideoManagerToolBar extends JPanel {
         return videoToolBar;
     }
 
-    public void refresh(GroupItemListPanel itemListPanel, GroupItemListPanel.ItemPanel itemPanel) {
-        final String groupTitle = itemPanel.getPlayViewItem().getGroupTitle();
-        itemListPanel.refresh(itemPanel.getPlayViewItem());
-        GroupListPanel groupPanel = GodHand.get(GodHand.K.GroupListPanel);
-        groupPanel.refresh(groupTitle);
+    public void refresh(GroupItemListPanel.ItemPanel itemPanel) {
+        GodHand.<GroupListPanel>exec(GodHand.K.GroupListPanel, groupListPanel -> {
+            final String groupTitle = itemPanel.getPlayViewItem().getGroupTitle();
+            groupListPanel.refresh(groupTitle);
+        });
     }
 
     public void setPlayViewItem(PlayViewItem playViewItem) {
-        GodHand.<JTextField>exec(GodHand.K.MediaLinkTextFiled, mediaLink -> mediaLink.setCaretPosition(0));
         groupTitleItem.setFieldValue(playViewItem.getGroupTitle());
         titleItem.setFieldValue(playViewItem.getChannelTitle());
         if (playViewItem.getDuration() != null) {
@@ -257,6 +256,10 @@ public class VideoManagerToolBar extends JPanel {
     public void appendConsoleLog(String log) {
         consoleLogTextArea.append(log);
         consoleLogTextArea.setCaretPosition(consoleLogTextArea.getDocument().getLength());
+    }
+
+    public String getTvgLogValue() {
+        return tvgLogoItem.getFieldValue();
     }
 
 }

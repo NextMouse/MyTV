@@ -16,7 +16,6 @@ public final class GodHand {
         VideoManagerToolBar,
         SystemConfig,
         PlaylistService,
-        LastGroupTitle,
     }
 
     /**
@@ -33,6 +32,7 @@ public final class GodHand {
         objMap.put(key, obj);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T get(K key) {
         return (T) objMap.get(key);
     }

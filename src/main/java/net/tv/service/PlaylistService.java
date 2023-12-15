@@ -2,6 +2,7 @@ package net.tv.service;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import net.tv.m3u.Constants;
 import net.tv.m3u.M3uParser;
@@ -71,11 +72,12 @@ public class PlaylistService {
     public void addOrUpdate(PlayViewItem playViewItem) {
         try {
             if (StrUtil.isBlank(playViewItem.getId())) {
+                playViewItem.setId(IdUtil.simpleUUID());
                 playViewItemDao.insert(playViewItem);
             } else {
                 playViewItemDao.update(playViewItem);
             }
-            if (playViewItem.getFavorite()) {
+            if (playViewItem.getFavorite() == Boolean.TRUE) {
                 playItemAvailableDao.insert(new PlayItemAvailable(playViewItem.getMediaUrl()));
             } else {
                 playItemAvailableDao.delete(new PlayItemAvailable(playViewItem.getMediaUrl()));

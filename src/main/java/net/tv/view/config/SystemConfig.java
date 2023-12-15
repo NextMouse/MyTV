@@ -29,12 +29,14 @@ public class SystemConfig {
     private ProxyConfig tvgLogo;
 
     private String openDirPath;
+    private String exportDirPath;
 
     public static SystemConfig getDefault() {
         return SystemConfig.builder()
                 .theme(ThemeConfig.getDefault())
                 .tvgLogo(ProxyConfig.getDefault())
                 .openDirPath(R.USER_HOME_PATH)
+                .exportDirPath(R.USER_HOME_PATH)
                 .build();
     }
 
@@ -44,6 +46,7 @@ public class SystemConfig {
                 .getHomeDirectory()
                 .getAbsolutePath();
         String OPEN_DIR_PATH = "m3u.open-path";
+        String EXPORT_DIR_PATH = "m3u.export-path";
         String THEME_BASE_PREFIX = "theme.";
         String THEME_SYSTEM = THEME_BASE_PREFIX + "system";
         String TVG_LOGO_PROXY_BASE_PREFIX = "tvg-logo.proxy.";
@@ -66,6 +69,8 @@ public class SystemConfig {
                 final String value = tempKV[1].trim();
                 if (key.equalsIgnoreCase(R.OPEN_DIR_PATH)) {
                     config.setOpenDirPath(value);
+                } else if (key.equalsIgnoreCase(R.EXPORT_DIR_PATH)) {
+                    config.setExportDirPath(value);
                 } else if (key.equalsIgnoreCase(R.THEME_SYSTEM)) {
                     config.theme.setSystem(ThemeConfig.Key.getOrDefault(value));
                 } else if (key.equalsIgnoreCase(R.TVG_LOGO_PROXY_HOSTNAME)) {
@@ -87,6 +92,10 @@ public class SystemConfig {
         sb.append(R.OPEN_DIR_PATH)
                 .append("=")
                 .append(openDirPath)
+                .append(separator);
+        sb.append(R.EXPORT_DIR_PATH)
+                .append("=")
+                .append(exportDirPath)
                 .append(separator);
         final String tvgLogoProxyHostName = tvgLogo.getHostname();
         final String tvgLogoProxyPort = String.valueOf(tvgLogo.getPort());

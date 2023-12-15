@@ -28,13 +28,14 @@ public class SearchTvUtil {
 
     private interface R {
         String URL_BASE = "http://tonkiang.us/";
-        String URL_SEARCH = URL_BASE + "?s=";
+        String URL_SEARCH = URL_BASE + "?page=%s&s=%s";
     }
 
-    public static List<PlayViewItem> search(String value) {
+    public static List<PlayViewItem> search(int pageIndex, String value) {
+        List<PlayViewItem> viewItemList = new ArrayList<>();
         try {
             ConsoleLog.println("正在搜索...");
-            Request request = new Request.Builder().url(R.URL_SEARCH + value).build();
+            Request request = new Request.Builder().url(String.format(R.URL_SEARCH, pageIndex, value)).build();
             Response response = httpClient.newCall(request).execute();
             if (response.body() != null && response.code() == HttpStatus.HTTP_OK) {
                 ConsoleLog.println("正在解析...");
@@ -42,7 +43,6 @@ public class SearchTvUtil {
                 Document document = Jsoup.parse(html, R.URL_BASE);
                 Elements resultElements = document.getElementsByClass("result");
                 resultElements.remove(0);
-                List<PlayViewItem> viewItemList = new ArrayList<>();
                 for (Element element : resultElements) {
                     if (StrUtil.isBlank(element.text())) {
                         continue;
@@ -51,12 +51,11 @@ public class SearchTvUtil {
                     if (playViewItem != null) viewItemList.add(playViewItem);
                 }
                 ConsoleLog.println("共查询到{}个节目.", viewItemList.size());
-                return viewItemList;
             }
         } catch (Exception ex) {
             ConsoleLog.println("搜索异常...");
         }
-        return null;
+        return viewItemList;
     }
 
     private static PlayViewItem getPlayViewItem(Element element) {
@@ -71,10 +70,6 @@ public class SearchTvUtil {
         } catch (Exception e) {
             return null;
         }
-    }
-
-    public static void main(String[] args) {
-        SearchTvUtil.search("Qello");
     }
 
 }

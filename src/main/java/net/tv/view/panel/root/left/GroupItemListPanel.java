@@ -1,6 +1,7 @@
 package net.tv.view.panel.root.left;
 
 import cn.hutool.core.collection.CollectionUtil;
+import lombok.Getter;
 import net.tv.service.PlaylistService;
 import net.tv.service.model.PlayViewItem;
 import net.tv.view.arm.GodHand;
@@ -33,33 +34,28 @@ public class GroupItemListPanel extends ScrollListAndTitlePanel<GroupItemListPan
         GodHand.register(GodHand.K.GroupItemListPanel, this);
     }
 
-    public void setDataByMyPlayItem(List<PlayViewItem> playViewItemList) {
+    private void setDataByMyPlayItem(List<PlayViewItem> playViewItemList) {
         List<ItemPanel> itemPanelList = playViewItemList.stream().map(ItemPanel::new).collect(Collectors.toList());
         this.customizeList.setData(itemPanelList);
     }
 
-    public void refresh(String groupTitle) {
-        GodHand.<PlaylistService>exec(GodHand.K.PlaylistService, playlistService -> {
-            List<PlayViewItem> playViewItemList = playlistService.getChannelTitleList(groupTitle);
+    public void refresh(String groupTitle, int selectIndex) {
+        final int finalSelectIndex = selectIndex >= customizeList.getModel().getSize() ? 0 : selectIndex;
+        GodHand.<GroupItemListPanel>exec(GodHand.K.GroupItemListPanel, itemPanel -> {
+            PlaylistService service = GodHand.get(GodHand.K.PlaylistService);
+            List<PlayViewItem> playViewItemList = service.getChannelTitleList(groupTitle);
             if (CollectionUtil.isNotEmpty(playViewItemList)) {
-                setDataByMyPlayItem(playViewItemList);
+                itemPanel.setDataByMyPlayItem(playViewItemList);
+                this.customizeList.setSelectedIndex(finalSelectIndex);
             }
         });
-        customizeList.setSelectedIndex(0);
-        GroupItemListPanel.ItemPanel itemPanel = customizeList.getModel(0);
-        if (itemPanel == null) return;
-        GodHand.<VideoManagerToolBar>exec(GodHand.K.VideoManagerToolBar, videoToolBar -> videoToolBar.setPlayViewItem(itemPanel.playViewItem));
-    }
-
-    public void refresh(PlayViewItem playViewItem) {
-        refresh(playViewItem.getGroupTitle());
     }
 
     @Override
-    public CustomizeComponent getCustomizeComponent() {
-        return new CustomizeComponent<ItemPanel>() {
+    public CustomizeComponent<ItemPanel> getCustomizeComponent() {
+        return new CustomizeComponent<>() {
             @Override
-            public void onMouseMoved(JList jList, ItemPanel comp) {
+            public void onMouseMoved(JList<ItemPanel> jList, ItemPanel comp) {
                 comp.tvTitleLabel.setForeground(R.MOVED_FOREGROUND);
                 comp.setBackground(R.MOVED_BACKGROUND);
                 comp.setForeground(R.MOVED_FOREGROUND);
@@ -84,13 +80,10 @@ public class GroupItemListPanel extends ScrollListAndTitlePanel<GroupItemListPan
         /**
          * 原始数据
          */
+        @Getter
         private final PlayViewItem playViewItem;
 
         private final JLabel tvTitleLabel;
-
-        public PlayViewItem getPlayViewItem() {
-            return playViewItem;
-        }
 
         public ItemPanel(PlayViewItem playViewItem) {
             this.playViewItem = playViewItem;
@@ -118,7 +111,9 @@ public class GroupItemListPanel extends ScrollListAndTitlePanel<GroupItemListPan
             GodHand.<PlaylistService>exec(GodHand.K.PlaylistService, playlistService -> {
                 playlistService.addOrUpdate(playViewItem);
             });
-            refresh(playViewItem);
+            GodHand.<GroupListPanel>exec(GodHand.K.GroupListPanel, itemPanel -> {
+                refresh(itemPanel.customizeList.getSelectedValue().getTrimText(), customizeList.getSelectedIndex());
+            });
         }
 
         public void disLike() {
@@ -126,7 +121,9 @@ public class GroupItemListPanel extends ScrollListAndTitlePanel<GroupItemListPan
             GodHand.<PlaylistService>exec(GodHand.K.PlaylistService, playlistService -> {
                 playlistService.addOrUpdate(playViewItem);
             });
-            refresh(playViewItem);
+            GodHand.<GroupListPanel>exec(GodHand.K.GroupListPanel, itemPanel -> {
+                refresh(itemPanel.customizeList.getSelectedValue().getTrimText(), customizeList.getSelectedIndex());
+            });
         }
 
         public boolean favorite() {

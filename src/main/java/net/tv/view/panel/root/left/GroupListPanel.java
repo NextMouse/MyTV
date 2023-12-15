@@ -2,8 +2,8 @@ package net.tv.view.panel.root.left;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.util.StrUtil;
 import net.tv.service.PlaylistService;
-import net.tv.service.model.PlayViewItem;
 import net.tv.view.arm.GodHand;
 import net.tv.view.component.Icons;
 import net.tv.view.component.ScrollListAndTitlePanel;
@@ -21,14 +21,16 @@ public class GroupListPanel extends ScrollListAndTitlePanel<GroupListPanel.Group
         List<String> groupTitleList = playlistService.getByGroupTitle();
         if (CollectionUtil.isNotEmpty(groupTitleList)) {
             setMediaGroupList(groupTitleList);
-            int lastIndex = ListUtil.lastIndexOf(groupTitleList, s -> s.equals(groupTitle));
-            if (lastIndex != -1) {
-                customizeList.setSelectedIndex(lastIndex);
-                GodHand.<GroupItemListPanel>exec(GodHand.K.GroupItemListPanel, itemPanel -> itemPanel.refresh(groupTitle));
-            } else {
-                String groupTitle0 = groupTitleList.get(0);
+            if (StrUtil.isBlank(groupTitle)) {
                 customizeList.setSelectedIndex(0);
-                GodHand.<GroupItemListPanel>exec(GodHand.K.GroupItemListPanel, itemPanel -> itemPanel.refresh(groupTitle0));
+                GodHand.<GroupItemListPanel>exec(GodHand.K.GroupItemListPanel,
+                        itemPanel -> itemPanel.refresh(groupTitle, 0));
+            } else {
+                int lastIndex = ListUtil.lastIndexOf(groupTitleList, s -> s.equals(groupTitle));
+                if (lastIndex == -1) lastIndex = 0;
+                customizeList.setSelectedIndex(lastIndex);
+                GodHand.<GroupItemListPanel>exec(GodHand.K.GroupItemListPanel,
+                        itemPanel -> itemPanel.refresh(groupTitle, itemPanel.customizeList.getSelectedIndex()));
             }
         }
     }
@@ -48,12 +50,8 @@ public class GroupListPanel extends ScrollListAndTitlePanel<GroupListPanel.Group
     public GroupListPanel() {
         super(R.TITLE, 120, groupTitleLabel -> {
             try {
-                PlaylistService service = GodHand.get(GodHand.K.PlaylistService);
                 GodHand.<GroupItemListPanel>exec(GodHand.K.GroupItemListPanel, itemPanel -> {
-                    List<PlayViewItem> playViewItemList = service.getChannelTitleList(groupTitleLabel.getTrimText());
-                    if (CollectionUtil.isNotEmpty(playViewItemList)) {
-                        itemPanel.setDataByMyPlayItem(playViewItemList);
-                    }
+                    itemPanel.refresh(groupTitleLabel.getTrimText(), 0);
                 });
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
@@ -65,10 +63,9 @@ public class GroupListPanel extends ScrollListAndTitlePanel<GroupListPanel.Group
     }
 
 
-    public class GroupItem extends JLabel {
+    public static class GroupItem extends JLabel {
         public GroupItem(String text) {
             super("  " + text);
-
             setOpaque(true);
         }
 
@@ -79,8 +76,6 @@ public class GroupListPanel extends ScrollListAndTitlePanel<GroupListPanel.Group
 
     /**
      * 右键菜单
-     *
-     * @return
      */
     @Override
     public BiConsumer<MouseEvent, GroupItem> getMouseConsumer() {

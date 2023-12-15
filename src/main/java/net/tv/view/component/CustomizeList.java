@@ -3,6 +3,8 @@ package net.tv.view.component;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -23,6 +25,10 @@ public class CustomizeList<T extends JComponent> extends JList<T> {
         listModel.clear();
         listModel.addAll(data);
         setModel(listModel);
+    }
+
+    public List<T> getData() {
+        return Collections.list(listModel.elements());
     }
 
     public T getModel(int index) {

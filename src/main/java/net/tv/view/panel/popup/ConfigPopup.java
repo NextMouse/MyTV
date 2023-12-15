@@ -91,7 +91,6 @@ public class ConfigPopup extends JDialog {
     public void close() {
         setVisible(false);
         SystemConfig systemConfig = GodHand.get(GodHand.K.SystemConfig);
-        systemConfig.setOpenDirPath(openDirPath.getFieldValue());
         systemConfig.setTvgLogo(ProxyConfig.builder().hostname(proxyHostname.getFieldValue()).port(proxyPort.getFieldValue()).build());
         systemConfig.setTheme(ThemeConfig.builder().system(ThemeConfig.Key.getOrDefault(getThemeSelected())).build());
         systemConfig.save();

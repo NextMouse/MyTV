@@ -45,7 +45,6 @@ public class SimpleButton extends JButton {
             try {
                 consumer.accept(e, me);
             } catch (Exception ex) {
-                ex.printStackTrace();
                 ConsoleLog.println(ex.getMessage());
             }
         });

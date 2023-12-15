@@ -27,3 +27,4 @@ target/
 src/test/
 my-tv.properties
 my-tv.db
+temp.db

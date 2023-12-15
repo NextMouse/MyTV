@@ -13,8 +13,6 @@ public class ScrollListAndTitlePanel<T extends JComponent> extends JPanel {
     }
 
     public JLabel titleLabel;
-
-
     public CustomizeList<T> customizeList;
 
     public ScrollListAndTitlePanel(String title, int width, Consumer<T> consumer) {

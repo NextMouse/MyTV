@@ -1,13 +1,13 @@
 package net.tv.view.panel.root.left;
 
 import cn.hutool.core.collection.CollectionUtil;
-import net.tv.view.config.SystemConfig;
 import net.tv.service.PlaylistService;
 import net.tv.service.orm.SqliteHelper;
 import net.tv.view.arm.ConsoleLog;
 import net.tv.view.arm.GodHand;
 import net.tv.view.component.Icons;
 import net.tv.view.component.SimpleButton;
+import net.tv.view.config.SystemConfig;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -34,27 +34,22 @@ public class FileMenuToolBar extends JToolBar {
             if (JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(null)) {
                 File file = fileChooser.getSelectedFile();
                 systemConfig.setOpenDirPath(file.getParent());
-                PlaylistService playlistService = GodHand.get(GodHand.K.PlaylistService);
-                if (playlistService == null) {
-                    playlistService = new PlaylistService();
-                    GodHand.register(GodHand.K.PlaylistService, playlistService);
-                }
-                playlistService.readFile(file);
-                List<String> groupTitleList = playlistService.getByGroupTitle();
-                if (CollectionUtil.isNotEmpty(groupTitleList)) {
-                    GodHand.<GroupListPanel>exec(GodHand.K.GroupListPanel,
-                            groupListPanel -> groupListPanel.setMediaGroupList(groupTitleList));
-                }
+                systemConfig.save();
+                GodHand.<PlaylistService>exec(GodHand.K.PlaylistService, service -> service.readFile(file));
+                showGroupPanel();
             }
         }));
 
         componentList.add(new SimpleButton("导出", Icons.Standard.EXPORT, (e, btn) -> {
-            JFileChooser chooser = new JFileChooser();
+            SystemConfig systemConfig = GodHand.get(GodHand.K.SystemConfig);
+            JFileChooser chooser = new JFileChooser(systemConfig.getExportDirPath());
             chooser.setFileFilter(new FileNameExtensionFilter("(*.m3u)", "m3u"));
             int option = chooser.showSaveDialog(null);
             if (option == JFileChooser.APPROVE_OPTION) {    //假如用户选择了保存
                 try {
                     File selectedFile = chooser.getSelectedFile();
+                    systemConfig.setExportDirPath(selectedFile.getParent());
+                    systemConfig.save();
                     String fileName = chooser.getName(selectedFile);    //从文件名输入框中获取文件名
                     //假如用户填写的文件名不带我们制定的后缀名，那么我们给它添上后缀
                     if (!fileName.contains(".") && !fileName.contains(".m3u")) {
@@ -84,11 +79,27 @@ public class FileMenuToolBar extends JToolBar {
         componentList.add(new SimpleButton("去重", Icons.Standard.DISTINCT, (e, btn) -> {
             try {
                 GodHand.exec(GodHand.K.PlaylistService, PlaylistService::distinct);
+                showGroupPanel();
             } catch (Exception ex) {
                 ConsoleLog.println(ex);
             }
         }));
 
+    }
+
+    public void showGroupPanel() {
+        GodHand.<PlaylistService>exec(GodHand.K.PlaylistService, service -> {
+            List<String> groupTitleList = service.getByGroupTitle();
+            if (CollectionUtil.isNotEmpty(groupTitleList)) {
+                GodHand.<GroupListPanel>exec(GodHand.K.GroupListPanel, groupListPanel -> {
+                    if (groupListPanel.customizeList.getSelectedValue() != null) {
+                        groupListPanel.refresh(groupListPanel.customizeList.getSelectedValue().getTrimText());
+                    } else {
+                        groupListPanel.refresh(null);
+                    }
+                });
+            }
+        });
     }
 
     public FileMenuToolBar() {
