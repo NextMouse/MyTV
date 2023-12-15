@@ -46,8 +46,10 @@ public class RightPanel extends JPanel {
         SimpleButton button = new SimpleButton("搜索", Icons.Standard.SEARCH, (e, btn) -> {
             String searchValue = searchField.getText();
             if (StrUtil.isNotBlank(searchValue)) {
-                List<PlayViewItem> itemList = SearchTvUtil.search(searchValue);
-                setResultList(itemList);
+                new Thread(() -> {
+                    List<PlayViewItem> itemList = SearchTvUtil.search(searchValue);
+                    setResultList(itemList);
+                }).start();
             }
         });
 

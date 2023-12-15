@@ -58,9 +58,7 @@ public class M3uParser {
                     throw new M3uFileFormatException(lineNum, line, "未知格式无法解析");
                 }
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (M3uFileFormatException e) {
+        } catch (IOException | M3uFileFormatException e) {
             throw new RuntimeException(e);
         }
         playlist.setItems(playItemList);
