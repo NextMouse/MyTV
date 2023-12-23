@@ -274,7 +274,7 @@ public class VideoManagerToolBar extends JPanel {
     }
 
     public void setPlayViewItem(PlayViewItem playViewItem) {
-        setPlayViewItem(playViewItem, false);
+        setPlayViewItem(playViewItem, true);
     }
 
     public void setPlayViewItem(PlayViewItem playViewItem, boolean autoplay) {
