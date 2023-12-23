@@ -127,17 +127,21 @@ public class RightPanel extends JPanel {
     }
 
     private List<SearchResultPanel> toResultPanelList(List<PlayViewItem> itemList) {
-        int initIndex = searchResultListPanel.getData().size() + 1;
         List<SearchResultPanel> addItemList = new ArrayList<>();
         for (int i = 0; i < itemList.size(); i++) {
-            addItemList.add(new SearchResultPanel(initIndex + i, itemList.get(i)));
+            addItemList.add(new SearchResultPanel(i + 1, itemList.get(i)));
         }
-        return Stream.concat(searchResultListPanel.getData().stream(), addItemList.stream()).toList();
+        return addItemList;
     }
 
     private void addResultList(List<PlayViewItem> itemList) {
         if (CollectionUtil.isNotEmpty(itemList)) {
-            searchResultListPanel.setData(toResultPanelList(itemList));
+            int initIndex = searchResultListPanel.getData().size() + 1;
+            List<SearchResultPanel> addItemList = new ArrayList<>();
+            for (int i = 0; i < itemList.size(); i++) {
+                addItemList.add(new SearchResultPanel(initIndex + i, itemList.get(i)));
+            }
+            searchResultListPanel.setData(Stream.concat(searchResultListPanel.getData().stream(), addItemList.stream()).toList());
         } else {
             nextSearchButton.setVisible(false);
         }
