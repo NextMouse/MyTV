@@ -9,7 +9,7 @@ import java.util.function.BiConsumer;
 
 public class SimpleButton extends JButton {
 
-    private SimpleButton me = this;
+    private final SimpleButton me = this;
 
     public SimpleButton(String name, BiConsumer<ActionEvent, JButton> consumer) {
         setText(name);

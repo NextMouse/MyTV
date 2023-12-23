@@ -1,6 +1,9 @@
 package net.tv.view.panel.root.center;
 
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.SerializeUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.formdev.flatlaf.util.StringUtils;
 import net.tv.service.PlaylistService;
 import net.tv.service.model.PlayViewItem;
@@ -15,6 +18,12 @@ import net.tv.view.panel.root.left.GroupListPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import static java.awt.GridBagConstraints.BOTH;
 import static java.awt.GridBagConstraints.REMAINDER;
@@ -125,10 +134,10 @@ public class VideoManagerToolBar extends JPanel {
         flowLayout.setHgap(0);
         videoToolBar.setMargin(R.MARGIN);
         videoToolBar.setLayout(flowLayout);
+        videoToolBar.setFloatable(false);
+        videoToolBar.setBorderPainted(false);
 
-        videoToolBar.add(new SimpleButton("刷新", Icons.Standard.VIDEO_REFRESH, (e, btn) -> GodHand.exec(GodHand.K.MediaPlayerManager, MediaPlayerManager::refresh)));
-
-        videoToolBar.add(new SimpleButton("声音：", Icons.Standard.VIDEO_VOLUME_OPEN, (e, btn) -> {
+        videoToolBar.add(new SimpleButton("声音:", Icons.Standard.VIDEO_VOLUME_OPEN, (e, btn) -> {
             MediaPlayerManager playerManager = GodHand.get(GodHand.K.MediaPlayerManager);
             if (playerManager.getMediaPlayer() == null) {
                 ConsoleLog.println("当前没有媒体载入");
@@ -148,6 +157,7 @@ public class VideoManagerToolBar extends JPanel {
         }));
 
         volumeSlider.setValue(100);
+        volumeSlider.setPreferredSize(new Dimension(80, 20));
         volumeSlider.setCursor(new Cursor(Cursor.HAND_CURSOR));
         setVolumeSliderEnabled(false);
         volumeSlider.addChangeListener(e -> {
@@ -169,6 +179,10 @@ public class VideoManagerToolBar extends JPanel {
                 btn.setIcon(Icons.Standard.VIDEO_PLAY);
             }
         }));
+
+        videoToolBar.add(new SimpleButton("刷新", Icons.Standard.VIDEO_REFRESH, (e, btn) -> GodHand.exec(GodHand.K.MediaPlayerManager, MediaPlayerManager::refresh)));
+
+        videoToolBar.addSeparator();
 
         videoToolBar.add(new SimpleButton("新增", Icons.Standard.FILE_SAVE, (e, btn) -> {
             PlayViewItem playViewItem = getPlayViewItem(null);
@@ -214,6 +228,41 @@ public class VideoManagerToolBar extends JPanel {
             });
         }));
 
+        videoToolBar.addSeparator();
+
+        videoToolBar.add(new SimpleButton("清空", (e, btn) -> {
+            setPlayViewItem(new PlayViewItem());
+        }));
+
+        videoToolBar.add(new SimpleButton("复制", (e, btn) -> {
+            try {
+                PlayViewItem playViewItem = getPlayViewItem(null);
+                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                clipboard.setContents(new StringSelection(JSONUtil.toJsonPrettyStr(playViewItem)), null);
+                ConsoleLog.println("复制成功！");
+            } catch (Exception ex) {
+                // ignore
+            }
+        }));
+
+        videoToolBar.add(new SimpleButton("粘贴", (e, btn) -> {
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            // 判断剪切板中是否包含字符串类型的数据
+            if (clipboard.isDataFlavorAvailable(DataFlavor.stringFlavor)) {
+                // 获取剪切板内容
+                Transferable contents = clipboard.getContents(null);
+                // 将内容转换为字符串类型并输出
+                try {
+                    Object obj = contents.getTransferData(DataFlavor.stringFlavor);
+                    PlayViewItem playViewItem = JSONUtil.toBean(obj.toString(), PlayViewItem.class);
+                    setPlayViewItem(playViewItem, false);
+                    ConsoleLog.println("粘贴成功！");
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
+        }));
+
         return videoToolBar;
     }
 
@@ -225,6 +274,10 @@ public class VideoManagerToolBar extends JPanel {
     }
 
     public void setPlayViewItem(PlayViewItem playViewItem) {
+        setPlayViewItem(playViewItem, false);
+    }
+
+    public void setPlayViewItem(PlayViewItem playViewItem, boolean autoplay) {
         groupTitleItem.setFieldValue(playViewItem.getGroupTitle());
         titleItem.setFieldValue(playViewItem.getChannelTitle());
         if (playViewItem.getDuration() != null) {
@@ -237,6 +290,7 @@ public class VideoManagerToolBar extends JPanel {
         if (StrUtil.isNotBlank(playViewItem.getTvgLogo())) {
             logoPanel.setTvLogo(playViewItem.getTvgLogo());
         }
+        if (!autoplay) return;
         GodHand.<MediaPlayerManager>exec(GodHand.K.MediaPlayerManager, playerManager -> {
             String mediaUrl = playViewItem.getMediaUrl();
             if (StrUtil.isNotBlank(mediaUrl)) {
@@ -246,7 +300,14 @@ public class VideoManagerToolBar extends JPanel {
     }
 
     public PlayViewItem getPlayViewItem(String id) {
-        PlayViewItem playViewItem = PlayViewItem.builder().id(id).groupTitle(groupTitleItem.getFieldValue()).channelTitle(titleItem.getFieldValue()).duration(StringUtils.isEmpty(durationItem.getFieldValue()) ? -1 : Integer.parseInt(durationItem.getFieldValue())).tvgId(tvgIdItem.getFieldValue()).tvgName(tvgNameItem.getFieldValue()).tvgLogo(tvgLogoItem.getFieldValue()).aspectRatio(null).mediaUrl(urlItem.getFieldValue()).build();
+        PlayViewItem playViewItem = PlayViewItem.builder()
+                .id(id).groupTitle(groupTitleItem.getFieldValue())
+                .channelTitle(titleItem.getFieldValue())
+                .duration(StringUtils.isEmpty(durationItem.getFieldValue()) ? -1 : Integer.parseInt(durationItem.getFieldValue()))
+                .tvgId(tvgIdItem.getFieldValue()).tvgName(tvgNameItem.getFieldValue()).tvgLogo(tvgLogoItem.getFieldValue())
+                .aspectRatio(null)
+                .mediaUrl(urlItem.getFieldValue())
+                .build();
         if (StrUtil.isBlank(playViewItem.getChannelTitle()) || StrUtil.isBlank(playViewItem.getMediaUrl())) {
             return null;
         }

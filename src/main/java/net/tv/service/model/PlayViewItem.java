@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import net.tv.m3u.ExtInfInfo;
 import net.tv.m3u.PlayItem;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,7 @@ import static net.tv.m3u.ExtInfInfo.AttrKey.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PlayViewItem {
+public class PlayViewItem implements Serializable {
 
     private String id;
 
