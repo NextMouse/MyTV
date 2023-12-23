@@ -10,11 +10,9 @@ import net.tv.view.panel.root.center.VideoManagerToolBar;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -27,7 +25,7 @@ public class RightPanel extends JPanel {
     }
 
     private JTextField searchField;
-    private JButton nextSearchButton;
+    private final JButton nextSearchButton;
 
     public RightPanel() {
         setLayout(new BorderLayout());
@@ -39,9 +37,14 @@ public class RightPanel extends JPanel {
         nextSearchButton.setVisible(false);
         nextSearchButton.addActionListener(e -> {
             try {
+                int selectedIndex = searchResultListPanel.getSelectedIndex();
                 searchPageIndex++;
                 List<PlayViewItem> itemList = SearchTvUtil.search(searchPageIndex, searchValue);
                 addResultList(itemList);
+                // 重新指定选中位置
+                if (selectedIndex != -1) {
+                    searchResultListPanel.setSelectedIndex(selectedIndex);
+                }
             } catch (Exception ex) {
                 ConsoleLog.println(ex.getMessage());
             }
@@ -120,35 +123,63 @@ public class RightPanel extends JPanel {
     }
 
     private void setResultList(List<PlayViewItem> itemList) {
-        searchResultListPanel.setData(itemList.stream().map(SearchResultPanel::new).collect(Collectors.toList()));
+        searchResultListPanel.setData(toResultPanelList(itemList));
+    }
+
+    private List<SearchResultPanel> toResultPanelList(List<PlayViewItem> itemList) {
+        int initIndex = searchResultListPanel.getData().size() + 1;
+        List<SearchResultPanel> addItemList = new ArrayList<>();
+        for (int i = 0; i < itemList.size(); i++) {
+            addItemList.add(new SearchResultPanel(initIndex + i, itemList.get(i)));
+        }
+        return Stream.concat(searchResultListPanel.getData().stream(), addItemList.stream()).toList();
     }
 
     private void addResultList(List<PlayViewItem> itemList) {
         if (CollectionUtil.isNotEmpty(itemList)) {
-            searchResultListPanel.setData(Stream.concat(
-                            searchResultListPanel.getData().stream(),
-                            itemList.stream().map(SearchResultPanel::new))
-                    .collect(Collectors.toList()));
+            searchResultListPanel.setData(toResultPanelList(itemList));
+        } else {
+            nextSearchButton.setVisible(false);
         }
     }
 
     public CustomizeComponent<SearchResultPanel> getCustomizeComponent() {
         return new CustomizeComponent<>() {
+
             @Override
             public void onMouseMoved(JList<SearchResultPanel> jList, SearchResultPanel comp) {
+                comp.getNumLabel().setForeground(R.MOVED_FOREGROUND);
                 comp.getChannelTitleLabel().setForeground(R.MOVED_FOREGROUND);
                 comp.getMediaUrlLabel().setForeground(R.MOVED_FOREGROUND);
                 comp.setBackground(R.MOVED_BACKGROUND);
                 comp.setForeground(R.MOVED_FOREGROUND);
+                comp.getResultPanel().setBackground(R.MOVED_BACKGROUND);
+                comp.getResultPanel().setForeground(R.MOVED_FOREGROUND);
             }
 
             @Override
             public void onDefault(JList<SearchResultPanel> jList, SearchResultPanel comp) {
+                comp.getNumLabel().setForeground(R.DEFAULT_FOREGROUND);
                 comp.getChannelTitleLabel().setForeground(R.DEFAULT_FOREGROUND);
                 comp.getMediaUrlLabel().setForeground(R.DEFAULT_FOREGROUND);
                 comp.setForeground(R.DEFAULT_FOREGROUND);
+                comp.getResultPanel().setForeground(R.DEFAULT_FOREGROUND);
                 comp.setBackground(null);
+                comp.getResultPanel().setBackground(null);
             }
+
+            @Override
+            public void onSelected(JList<SearchResultPanel> jList, SearchResultPanel comp) {
+                comp.getNumLabel().setForeground(R.MOVED_FOREGROUND);
+                comp.getChannelTitleLabel().setForeground(R.MOVED_FOREGROUND);
+                comp.getMediaUrlLabel().setForeground(R.MOVED_FOREGROUND);
+                comp.setForeground(R.MOVED_FOREGROUND);
+                comp.getResultPanel().setForeground(R.MOVED_FOREGROUND);
+                comp.setBackground(Color.PINK);
+                comp.getResultPanel().setBackground(Color.PINK);
+            }
+
+
         };
     }
 
