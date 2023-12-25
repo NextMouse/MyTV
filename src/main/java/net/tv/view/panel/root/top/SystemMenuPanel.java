@@ -16,7 +16,7 @@ import java.util.List;
 
 public class SystemMenuPanel extends JToolBar {
 
-    private List<SimpleButton> buttonList = new ArrayList<>();
+    private final List<SimpleButton> buttonList = new ArrayList<>();
 
     {
         buttonList.add(new SimpleButton(Icons.Standard.CONFIG, "系统配置", (e, btn) -> {
@@ -47,8 +47,7 @@ public class SystemMenuPanel extends JToolBar {
 
         buttonList.add(new SimpleButton(Icons.Standard.CLOSE, "关闭", (e, btn) -> {
             try {
-                SqliteHelper.get()
-                        .close();
+                SqliteHelper.get().close();
                 GodHand.exec(GodHand.K.SystemConfig, SystemConfig::save);
             } catch (Exception ex) {
                 // ignore

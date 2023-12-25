@@ -1,13 +1,17 @@
 package net.tv.view.component;
 
+import lombok.Getter;
+
 import javax.swing.*;
 import java.awt.*;
 
+@Getter
 public class FieldItem extends JPanel {
 
-    private JLabel fieldTitle;
+    private final JLabel fieldTitle;
 
-    private JTextField textField;
+
+    private final JTextField textField;
 
     public FieldItem(String title) {
         fieldTitle = new JLabel(" " + title + "：");
@@ -26,10 +30,6 @@ public class FieldItem extends JPanel {
 
     public String getFieldValue() {
         return textField.getText();
-    }
-
-    public JTextField getTextField() {
-        return textField;
     }
 
 }

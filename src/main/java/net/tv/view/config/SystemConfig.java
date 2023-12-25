@@ -1,6 +1,7 @@
 package net.tv.view.config;
 
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
@@ -13,14 +14,16 @@ import net.tv.view.arm.ConsoleLog;
 import javax.swing.filechooser.FileSystemView;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @Builder
 public class SystemConfig {
 
-    public static final String SYSTEM_CONFIG_URL = R.SYSTEM_CONFIG_PATH + "/my-tv.properties";
+    public static final String SYSTEM_CONFIG_URL = R.SYSTEM_CONFIG_PATH + "/my-tv.conf";
     public static final String TEMP_DB_FILE_PATH = R.SYSTEM_CONFIG_PATH + "/temp.db";
     public static final String DB_FILE_PATH = R.SYSTEM_CONFIG_PATH + "/my-tv.db";
 
@@ -29,7 +32,10 @@ public class SystemConfig {
     private ProxyConfig tvgLogo;
 
     private String openDirPath;
+
     private String exportDirPath;
+
+    private List<String> tvSources;
 
     public static SystemConfig getDefault() {
         return SystemConfig.builder()
@@ -37,6 +43,7 @@ public class SystemConfig {
                 .tvgLogo(ProxyConfig.getDefault())
                 .openDirPath(R.USER_HOME_PATH)
                 .exportDirPath(R.USER_HOME_PATH)
+                .tvSources(new ArrayList<>())
                 .build();
     }
 
@@ -45,6 +52,7 @@ public class SystemConfig {
         String USER_HOME_PATH = FileSystemView.getFileSystemView()
                 .getHomeDirectory()
                 .getAbsolutePath();
+        String TV_SOURCES = "m3u.tv-sources";
         String OPEN_DIR_PATH = "m3u.open-path";
         String EXPORT_DIR_PATH = "m3u.export-path";
         String THEME_BASE_PREFIX = "theme.";
@@ -77,6 +85,8 @@ public class SystemConfig {
                     config.tvgLogo.setHostname(value);
                 } else if (key.equalsIgnoreCase(R.TVG_LOGO_PROXY_PORT)) {
                     config.tvgLogo.setPort(value);
+                } else if (key.equalsIgnoreCase(R.TV_SOURCES)) {
+                    config.tvSources.add(value);
                 }
             }
             return config;
@@ -114,6 +124,14 @@ public class SystemConfig {
                 .append(theme.getSystem()
                         .toString())
                 .append(separator);
+        if (CollectionUtil.isNotEmpty(tvSources)) {
+            tvSources.forEach(tvSourceUrl -> {
+                sb.append(R.TV_SOURCES)
+                        .append("=")
+                        .append(tvSourceUrl)
+                        .append(separator);
+            });
+        }
         FileUtil.writeString(StrUtil.utf8Str(sb.toString()), new File(SYSTEM_CONFIG_URL), StandardCharsets.UTF_8);
         ConsoleLog.println("保存配置 ==> {}", SYSTEM_CONFIG_URL);
     }

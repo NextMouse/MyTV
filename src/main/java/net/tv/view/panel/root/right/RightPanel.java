@@ -14,7 +14,9 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
 public class RightPanel extends JPanel {
@@ -27,36 +29,55 @@ public class RightPanel extends JPanel {
     private JTextField searchField;
     private final JButton nextSearchButton;
 
+    private final CustomizeList<SearchResultPanel> searchResultListPanel1;
+    private final CustomizeList<SearchResultPanel> searchResultListPanel2;
+
     public RightPanel() {
         setLayout(new BorderLayout());
+
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        JPanel panel1 = new JPanel(new BorderLayout());
         // 添加搜索结果
-        add(getSearchResultPanel(), BorderLayout.CENTER);
+        searchResultListPanel1 = getSearchResultPanel();
+        panel1.add(packResultPanel(searchResultListPanel1), BorderLayout.CENTER);
         // 添加下一个按钮
-        nextSearchButton = new JButton("更 多");
-        nextSearchButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        nextSearchButton.setVisible(false);
-        nextSearchButton.addActionListener(e -> {
+        nextSearchButton = getNextSearchButton();
+        panel1.add(nextSearchButton, BorderLayout.SOUTH);
+
+        JPanel panel2 = new JPanel(new BorderLayout());
+        searchResultListPanel2 = getSearchResultPanel();
+        panel2.add(packResultPanel(searchResultListPanel2), BorderLayout.CENTER);
+
+        tabbedPane.addTab("SearchTV", panel1);
+        tabbedPane.addTab("SourceTV", panel2);
+
+        add(tabbedPane, BorderLayout.CENTER);
+        add(getSearchPanel(), BorderLayout.SOUTH);
+    }
+
+
+    private JButton getNextSearchButton() {
+        JButton button = new JButton("更 多");
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setVisible(false);
+        button.addActionListener(e -> new Thread(() -> {
             try {
-                int selectedIndex = searchResultListPanel.getSelectedIndex();
+                int selectedIndex = searchResultListPanel1.getSelectedIndex();
                 searchPageIndex++;
-                List<PlayViewItem> itemList = SearchTvUtil.search(searchPageIndex, searchValue);
-                addResultList(itemList);
+                List<PlayViewItem> playViewItems = SearchTvUtil.search(searchPageIndex, searchValue);
+                addResultList(searchResultListPanel1, playViewItems);
                 // 重新指定选中位置
                 if (selectedIndex != -1) {
-                    searchResultListPanel.setSelectedIndex(selectedIndex);
+                    searchResultListPanel1.setSelectedIndex(selectedIndex);
                 }
             } catch (Exception ex) {
                 ConsoleLog.println(ex.getMessage());
             }
-        });
-
-        JPanel searchPanel = new JPanel(new BorderLayout());
-        searchPanel.add(nextSearchButton, BorderLayout.NORTH);
-        searchPanel.add(getSearchPanel(), BorderLayout.SOUTH);
-        // 添加下搜索框
-        add(searchPanel, BorderLayout.SOUTH);
+        }).start());
+        return button;
     }
-
 
     private int searchPageIndex = 1;
     private String searchValue;
@@ -73,12 +94,25 @@ public class RightPanel extends JPanel {
         SimpleButton button = new SimpleButton("搜索", Icons.Standard.SEARCH, (e, btn) -> {
             searchValue = searchField.getText();
             if (StrUtil.isNotBlank(searchValue)) {
-                new Thread(() -> {
+                final ExecutorService executor = Executors.newFixedThreadPool(2);
+                executor.execute(() -> {
                     searchPageIndex = 1;
-                    List<PlayViewItem> itemList = SearchTvUtil.search(searchPageIndex, searchValue);
-                    setResultList(itemList);
-                    nextSearchButton.setVisible(itemList.size() >= 30);
-                }).start();
+                    List<PlayViewItem> playViewItems = SearchTvUtil.search(searchPageIndex, searchValue);
+                    addResultList(searchResultListPanel1, playViewItems);
+                    nextSearchButton.setVisible(playViewItems.size() >= 30);
+                });
+                executor.execute(() -> {
+                    List<Future<List<PlayViewItem>>> futures = SearchSourceTvUtil.search(searchValue);
+                    for (Future<List<PlayViewItem>> future : futures) {
+                        try {
+                            List<PlayViewItem> playViewItems = future.get();
+                            addResultList(searchResultListPanel2, playViewItems);
+                        } catch (Exception ex) {
+                            // ignore
+                        }
+                    }
+                });
+                executor.shutdown();
             }
         });
 
@@ -97,10 +131,19 @@ public class RightPanel extends JPanel {
         return toolBar;
     }
 
-    private CustomizeList<SearchResultPanel> searchResultListPanel;
 
-    private JScrollPane getSearchResultPanel() {
-        searchResultListPanel = new CustomizeList<>(getCustomizeComponent(), selectedItem -> {
+    private JScrollPane packResultPanel(CustomizeList<SearchResultPanel> searchResultListPanel) {
+        JScrollPane scrollPane = new JScrollPane(searchResultListPanel);
+        scrollPane.setForeground(null);
+        scrollPane.setBackground(null);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1, false));
+        scrollPane.setPreferredSize(R.SCROLL_PANE_SIZE);
+        return scrollPane;
+    }
+
+    private CustomizeList<SearchResultPanel> getSearchResultPanel() {
+        return new CustomizeList<>(getCustomizeComponent(), selectedItem -> {
             if (selectedItem == null) return;
             GodHand.<VideoManagerToolBar>exec(GodHand.K.VideoManagerToolBar, videoToolBar -> {
                 GodHand.<JTextField>exec(GodHand.K.MediaLinkTextFiled, mediaLink -> mediaLink.setCaretPosition(0));
@@ -113,38 +156,16 @@ public class RightPanel extends JPanel {
                 });
             });
         });
-        JScrollPane scrollPane = new JScrollPane(searchResultListPanel);
-        scrollPane.setForeground(null);
-        scrollPane.setBackground(null);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollPane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1, false));
-        scrollPane.setPreferredSize(R.SCROLL_PANE_SIZE);
-        return scrollPane;
     }
 
-    private void setResultList(List<PlayViewItem> itemList) {
-        searchResultListPanel.setData(toResultPanelList(itemList));
-    }
-
-    private List<SearchResultPanel> toResultPanelList(List<PlayViewItem> itemList) {
+    private void addResultList(CustomizeList<SearchResultPanel> panel, List<PlayViewItem> itemList) {
+        if (CollectionUtil.isEmpty(itemList)) return;
+        int initIndex = panel.getData().size() + 1;
         List<SearchResultPanel> addItemList = new ArrayList<>();
         for (int i = 0; i < itemList.size(); i++) {
-            addItemList.add(new SearchResultPanel(i + 1, itemList.get(i)));
+            addItemList.add(new SearchResultPanel(initIndex + i, itemList.get(i)));
         }
-        return addItemList;
-    }
-
-    private void addResultList(List<PlayViewItem> itemList) {
-        if (CollectionUtil.isNotEmpty(itemList)) {
-            int initIndex = searchResultListPanel.getData().size() + 1;
-            List<SearchResultPanel> addItemList = new ArrayList<>();
-            for (int i = 0; i < itemList.size(); i++) {
-                addItemList.add(new SearchResultPanel(initIndex + i, itemList.get(i)));
-            }
-            searchResultListPanel.setData(Stream.concat(searchResultListPanel.getData().stream(), addItemList.stream()).toList());
-        } else {
-            nextSearchButton.setVisible(false);
-        }
+        panel.setData(Stream.concat(panel.getData().stream(), addItemList.stream()).toList());
     }
 
     public CustomizeComponent<SearchResultPanel> getCustomizeComponent() {

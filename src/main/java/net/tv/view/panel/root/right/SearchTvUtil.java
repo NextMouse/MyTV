@@ -3,8 +3,8 @@ package net.tv.view.panel.root.right;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpStatus;
 import net.tv.service.model.PlayViewItem;
+import net.tv.util.HttpClient;
 import net.tv.view.arm.ConsoleLog;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.io.IOUtils;
@@ -15,30 +15,22 @@ import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Objects;
 
 public class SearchTvUtil {
 
-    private static final OkHttpClient httpClient = new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS)//连接超时(单位:秒)
-            .callTimeout(30, TimeUnit.SECONDS)//整个流程耗费的超时时间(单位:秒)--很少人使用
-            .pingInterval(5, TimeUnit.SECONDS)//websocket轮训间隔(单位:秒)
-            .readTimeout(60, TimeUnit.SECONDS)//读取超时(单位:秒)
-            .writeTimeout(60, TimeUnit.SECONDS)//写入超时(单位:秒)
-            .build();
-
     private interface R {
-        String URL_BASE = "http://tonkiang.us/";
+        String URL_BASE = "https://tonkiang.us/";
         String URL_SEARCH = URL_BASE + "?page=%s&s=%s";
     }
 
     public static List<PlayViewItem> search(int pageIndex, String value) {
         List<PlayViewItem> viewItemList = new ArrayList<>();
         try {
-            ConsoleLog.println("正在搜索...");
+            ConsoleLog.println("SearchTv 正在搜索...");
             Request request = new Request.Builder().url(String.format(R.URL_SEARCH, pageIndex, value)).build();
-            Response response = httpClient.newCall(request).execute();
+            Response response = HttpClient.getClient().newCall(request).execute();
             if (response.body() != null && response.code() == HttpStatus.HTTP_OK) {
-                ConsoleLog.println("正在解析...");
                 String html = IOUtils.toString(response.body().byteStream());
                 Document document = Jsoup.parse(html, R.URL_BASE);
                 Elements resultElements = document.getElementsByClass("result");
@@ -50,10 +42,10 @@ public class SearchTvUtil {
                     PlayViewItem playViewItem = getPlayViewItem(element);
                     if (playViewItem != null) viewItemList.add(playViewItem);
                 }
-                ConsoleLog.println("共查询到{}个节目.", viewItemList.size());
+                ConsoleLog.println("SearchTv 共查询到{}个节目.", viewItemList.size());
             }
         } catch (Exception ex) {
-            ConsoleLog.println("搜索异常...");
+            ConsoleLog.println("SearchTv 搜索异常...");
         }
         return viewItemList;
     }
@@ -62,7 +54,7 @@ public class SearchTvUtil {
         assert element != null;
         try {
             String channelTitle = element.child(0).child(0).child(0).text().trim();
-            String mediaUrl = element.getElementsByAttributeValue("class", "tables").last().text().trim();
+            String mediaUrl = Objects.requireNonNull(element.getElementsByAttributeValue("class", "tables").last()).text().trim();
             return PlayViewItem.builder()
                     .channelTitle(channelTitle)
                     .mediaUrl(mediaUrl)
