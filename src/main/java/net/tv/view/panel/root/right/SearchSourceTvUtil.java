@@ -1,7 +1,9 @@
 package net.tv.view.panel.root.right;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpStatus;
+import cn.hutool.http.HttpUtil;
 import net.tv.m3u.M3uParser;
 import net.tv.m3u.Playlist;
 import net.tv.service.model.PlayViewItem;
@@ -30,10 +32,27 @@ public class SearchSourceTvUtil {
         if (getSourceList().isEmpty()) return futures;
         for (String sourceUrl : getSourceList()) {
             ConsoleLog.println("SourceTv 正在查询：{}", sourceUrl);
-            Future<List<PlayViewItem>> future = executorService.submit(() -> getPlayViewItems(sourceUrl, trimValue));
+            Future<List<PlayViewItem>> future = executorService.submit(() -> {
+                if (HttpUtil.isHttp(sourceUrl) || HttpUtil.isHttps(sourceUrl)) {
+                    return getPlayViewItems(sourceUrl, trimValue);
+                } else {
+                    return getPlayViewItemsByFile(sourceUrl, trimValue);
+                }
+            });
             futures.add(future);
         }
         return futures;
+    }
+
+    private static List<PlayViewItem> getPlayViewItemsByFile(String sourceUrl, String searchValue) {
+        ConsoleLog.println("SourceTv 正在解析: {}", sourceUrl);
+        try {
+            Playlist playlist = new M3uParser().parseAndSearch(FileUtil.getInputStream(sourceUrl), searchValue);
+            return playlist.getItems().stream().map(PlayViewItem::getByPlayItem).toList();
+        } catch (Exception ex) {
+            ConsoleLog.println("SourceTv 解析失败: {}, error:{}", sourceUrl, ex.getMessage());
+        }
+        return new ArrayList<>();
     }
 
     private static List<PlayViewItem> getPlayViewItems(String sourceUrl, String searchValue) throws IOException {

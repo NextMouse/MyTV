@@ -97,18 +97,22 @@ public class RightPanel extends JPanel {
                 final ExecutorService executor = Executors.newFixedThreadPool(2);
                 executor.execute(() -> {
                     searchPageIndex = 1;
+                    searchResultListPanel1.setData(new ArrayList<>());
                     List<PlayViewItem> playViewItems = SearchTvUtil.search(searchPageIndex, searchValue);
                     addResultList(searchResultListPanel1, playViewItems);
                     nextSearchButton.setVisible(playViewItems.size() >= 30);
                 });
                 executor.execute(() -> {
+                    searchResultListPanel2.setData(new ArrayList<>());
                     List<Future<List<PlayViewItem>>> futures = SearchSourceTvUtil.search(searchValue);
                     for (Future<List<PlayViewItem>> future : futures) {
                         try {
                             List<PlayViewItem> playViewItems = future.get();
+                            ConsoleLog.println("SourceTv 已搜索到：{}个", playViewItems.size());
                             addResultList(searchResultListPanel2, playViewItems);
                         } catch (Exception ex) {
                             // ignore
+                            ConsoleLog.println("SourceTv 搜索异常：{}", ex.getMessage());
                         }
                     }
                 });
