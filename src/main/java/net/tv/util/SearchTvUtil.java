@@ -1,4 +1,4 @@
-package net.tv.view.panel.root.right;
+package net.tv.util;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpStatus;
@@ -20,7 +20,7 @@ import java.util.Objects;
 public class SearchTvUtil {
 
     private interface R {
-        String URL_BASE = "https://tonkiang.us/";
+        String URL_BASE = "http://tonkiang.us/";
         String URL_SEARCH = URL_BASE + "?page=%s&s=%s";
     }
 
@@ -45,7 +45,7 @@ public class SearchTvUtil {
                 ConsoleLog.println("SearchTv 共查询到{}个节目.", viewItemList.size());
             }
         } catch (Exception ex) {
-            ConsoleLog.println("SearchTv 搜索异常...");
+            ConsoleLog.println("SearchTv 搜索异常:{}", ex.getMessage());
         }
         return viewItemList;
     }

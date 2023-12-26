@@ -12,7 +12,7 @@ public class ImageDownloadUtil {
 
 
     public static void download(final String imgHttpUrl, final Consumer<ImageIcon> success, final Consumer<String> error) {
-        new Thread(() -> {
+        AsyncUtil.exec(() -> {
             try {
                 Request request = new Request.Builder().url(imgHttpUrl).build();
                 Response response = HttpClient.getClient().newCall(request).execute();
@@ -26,7 +26,7 @@ public class ImageDownloadUtil {
                 ConsoleLog.println(e);
                 error.accept(imgHttpUrl);
             }
-        }).start();
+        });
     }
 
 }

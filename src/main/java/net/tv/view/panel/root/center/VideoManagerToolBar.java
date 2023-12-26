@@ -171,7 +171,7 @@ public class VideoManagerToolBar extends JPanel {
             }
         }));
 
-        videoToolBar.add(new SimpleButton("刷新", Icons.Standard.VIDEO_REFRESH, (e, btn) -> GodHand.exec(GodHand.K.IMediaPlayer, IMediaPlayer::refresh)));
+        videoToolBar.add(new SimpleButton("刷新", Icons.Standard.VIDEO_REFRESH, (e, btn) -> GodHand.asyncExec(GodHand.K.IMediaPlayer, IMediaPlayer::refresh)));
 
         videoToolBar.addSeparator();
 
@@ -277,7 +277,7 @@ public class VideoManagerToolBar extends JPanel {
             logoPanel.setTvLogo(playViewItem.getTvgLogo());
         }
         if (!autoplay) return;
-        GodHand.<IMediaPlayer>exec(GodHand.K.IMediaPlayer, playerManager -> playerManager.play(playViewItem.getMediaUrl()));
+        GodHand.<IMediaPlayer>asyncExec(GodHand.K.IMediaPlayer, playerManager -> playerManager.play(playViewItem.getMediaUrl()));
     }
 
     public PlayViewItem getPlayViewItem(String id) {

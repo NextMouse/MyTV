@@ -3,6 +3,9 @@ package net.tv.view.panel.root.right;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import net.tv.service.model.PlayViewItem;
+import net.tv.util.AsyncUtil;
+import net.tv.util.SearchSourceTvUtil;
+import net.tv.util.SearchTvUtil;
 import net.tv.view.arm.ConsoleLog;
 import net.tv.view.arm.GodHand;
 import net.tv.view.component.*;
@@ -62,7 +65,7 @@ public class RightPanel extends JPanel {
         JButton button = new JButton("更 多");
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setVisible(false);
-        button.addActionListener(e -> new Thread(() -> {
+        button.addActionListener(e -> AsyncUtil.exec(() -> {
             try {
                 int selectedIndex = searchResultListPanel1.getSelectedIndex();
                 searchPageIndex++;
@@ -75,7 +78,7 @@ public class RightPanel extends JPanel {
             } catch (Exception ex) {
                 ConsoleLog.println(ex.getMessage());
             }
-        }).start());
+        }));
         return button;
     }
 
@@ -152,10 +155,7 @@ public class RightPanel extends JPanel {
             GodHand.<VideoManagerToolBar>exec(GodHand.K.VideoManagerToolBar, videoToolBar -> {
                 GodHand.<JTextField>exec(GodHand.K.MediaLinkTextFiled, mediaLink -> mediaLink.setCaretPosition(0));
                 // 搜索结果只播放
-                GodHand.<IMediaPlayer>exec(GodHand.K.IMediaPlayer, player -> {
-                    String mediaUrl = selectedItem.getPlayViewItem().getMediaUrl();
-                    player.play(mediaUrl);
-                });
+                GodHand.<IMediaPlayer>asyncExec(GodHand.K.IMediaPlayer, player -> player.play(selectedItem.getPlayViewItem().getMediaUrl()));
             });
         });
     }

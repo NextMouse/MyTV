@@ -130,7 +130,7 @@ public class JavaFxPlayer implements IMediaPlayer {
     public static class PlayerErrorHandler implements EventHandler<MediaErrorEvent> {
         @Override
         public void handle(MediaErrorEvent mediaErrorEvent) {
-            ConsoleLog.println(mediaErrorEvent.getMediaError().getMessage());
+            ConsoleLog.println("播放错误：{}", mediaErrorEvent.getMediaError().getMessage());
         }
     }
 
@@ -140,7 +140,9 @@ public class JavaFxPlayer implements IMediaPlayer {
             this.mediaView.getMediaPlayer().stop();
             this.mediaView.getMediaPlayer().dispose();
         }
-        this.mediaView.setMediaPlayer(new MediaPlayer(new Media(src)));
+        final Media media = new Media(src);
+        ConsoleLog.println("视频宽高比：[{}×{}]", media.getWidth(), media.getHeight());
+        this.mediaView.setMediaPlayer(new MediaPlayer(media));
     }
 
 }
