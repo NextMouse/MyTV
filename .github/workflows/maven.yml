@@ -16,7 +16,8 @@ on:
 
 jobs:
   build:
-
+    #	配置权限
+    permissions: write-all
     runs-on: ubuntu-latest
 
     steps:
