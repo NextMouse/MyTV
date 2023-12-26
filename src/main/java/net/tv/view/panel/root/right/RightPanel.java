@@ -152,11 +152,9 @@ public class RightPanel extends JPanel {
             GodHand.<VideoManagerToolBar>exec(GodHand.K.VideoManagerToolBar, videoToolBar -> {
                 GodHand.<JTextField>exec(GodHand.K.MediaLinkTextFiled, mediaLink -> mediaLink.setCaretPosition(0));
                 // 搜索结果只播放
-                GodHand.<MediaPlayerManager>exec(GodHand.K.MediaPlayerManager, playerManager -> {
+                GodHand.<IMediaPlayer>exec(GodHand.K.IMediaPlayer, player -> {
                     String mediaUrl = selectedItem.getPlayViewItem().getMediaUrl();
-                    if (StrUtil.isNotBlank(mediaUrl)) {
-                        playerManager.load(mediaUrl).play();
-                    }
+                    player.play(mediaUrl);
                 });
             });
         });

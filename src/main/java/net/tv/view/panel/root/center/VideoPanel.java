@@ -1,7 +1,10 @@
 package net.tv.view.panel.root.center;
 
+import net.tv.view.arm.ConsoleLog;
 import net.tv.view.arm.GodHand;
-import net.tv.view.component.MediaPanel;
+import net.tv.view.component.IMediaPlayer;
+import net.tv.view.component.impl.JavaFxPlayer;
+import net.tv.view.component.impl.VlcPlayer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,11 +17,17 @@ public class VideoPanel extends JPanel {
 
     public VideoPanel() {
         setLayout(new BorderLayout());
-        // 视频播放区域
-        MediaPanel mediaPanel = new MediaPanel();
-        add(mediaPanel, BorderLayout.CENTER);
         setBackground(R.BACKGROUND_COLOR);
-        GodHand.register(GodHand.K.MediaPanel, mediaPanel);
+
+        IMediaPlayer mediaPlayer;
+        try {
+            mediaPlayer = new VlcPlayer();
+        } catch (Exception ex) {
+            ConsoleLog.println("当前使用 JavaFX MediaPlayer");
+            mediaPlayer = new JavaFxPlayer();
+        }
+        add(mediaPlayer.getJComponentPanel(), BorderLayout.CENTER);
+        GodHand.register(GodHand.K.IMediaPlayer, mediaPlayer);
     }
 
 }

@@ -5,7 +5,6 @@ import net.tv.service.PlaylistService;
 import net.tv.view.arm.ConsoleLog;
 import net.tv.view.arm.GodHand;
 import net.tv.view.component.Icons;
-import net.tv.view.component.MediaPanel;
 import net.tv.view.config.SystemConfig;
 import net.tv.view.config.ThemeConfig;
 import net.tv.view.panel.root.RootPanel;
@@ -65,7 +64,6 @@ public class WindowMain extends JFrame {
         add(root, BorderLayout.CENTER);
         EventQueue.invokeLater(() -> {
             setVisible(true);
-            GodHand.<MediaPanel>exec(GodHand.K.MediaPanel, MediaPanel::resize);
         });
     }
 

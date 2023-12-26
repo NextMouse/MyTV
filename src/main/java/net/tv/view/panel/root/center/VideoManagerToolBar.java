@@ -1,7 +1,5 @@
 package net.tv.view.panel.root.center;
 
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.SerializeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.formdev.flatlaf.util.StringUtils;
@@ -10,8 +8,8 @@ import net.tv.service.model.PlayViewItem;
 import net.tv.view.arm.ConsoleLog;
 import net.tv.view.arm.GodHand;
 import net.tv.view.component.FieldItem;
+import net.tv.view.component.IMediaPlayer;
 import net.tv.view.component.Icons;
-import net.tv.view.component.MediaPlayerManager;
 import net.tv.view.component.SimpleButton;
 import net.tv.view.panel.root.left.GroupItemListPanel;
 import net.tv.view.panel.root.left.GroupListPanel;
@@ -22,8 +20,6 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 import static java.awt.GridBagConstraints.BOTH;
 import static java.awt.GridBagConstraints.REMAINDER;
@@ -46,7 +42,7 @@ public class VideoManagerToolBar extends JPanel {
     interface R {
         Insets MARGIN = new Insets(0, 0, 0, 0);
         String CONSOLE_PREFIX = "控制台：";
-        int CONSOLE_TEXTAREA_HEIGHT = 120;
+        int CONSOLE_TEXTAREA_HEIGHT = 80;
     }
 
     public VideoManagerToolBar() {
@@ -138,21 +134,17 @@ public class VideoManagerToolBar extends JPanel {
         videoToolBar.setBorderPainted(false);
 
         videoToolBar.add(new SimpleButton("声音:", Icons.Standard.VIDEO_VOLUME_OPEN, (e, btn) -> {
-            MediaPlayerManager playerManager = GodHand.get(GodHand.K.MediaPlayerManager);
-            if (playerManager.getMediaPlayer() == null) {
-                ConsoleLog.println("当前没有媒体载入");
-                return;
-            }
+            IMediaPlayer mediaPlayer = GodHand.get(GodHand.K.IMediaPlayer);
             if ("已静音".equals(btn.getText())) { // 准备打开
                 btn.setText("");
                 btn.setIcon(Icons.Standard.VIDEO_VOLUME_OPEN);
                 volumeSlider.setVisible(true);
-                playerManager.setSilent(false);
+                mediaPlayer.mute(false);
             } else { // 准备静音
                 btn.setText("已静音");
                 btn.setIcon(Icons.Standard.VIDEO_VOLUME_CLOSE);
                 volumeSlider.setVisible(false);
-                playerManager.setSilent(true);
+                mediaPlayer.mute(true);
             }
         }));
 
@@ -161,26 +153,25 @@ public class VideoManagerToolBar extends JPanel {
         volumeSlider.setCursor(new Cursor(Cursor.HAND_CURSOR));
         setVolumeSliderEnabled(false);
         volumeSlider.addChangeListener(e -> {
-            JSlider vp = (JSlider) e.getSource();
-            MediaPlayerManager playerManager = GodHand.get(GodHand.K.MediaPlayerManager);
-            playerManager.setVolume(vp.getValue());
+            JSlider slider = (JSlider) e.getSource();
+            GodHand.<IMediaPlayer>exec(GodHand.K.IMediaPlayer, player -> player.volume(slider.getValue()));
         });
         videoToolBar.add(volumeSlider);
 
         videoToolBar.add(new SimpleButton("播放中", Icons.Standard.VIDEO_PLAY, (e, btn) -> {
-            MediaPlayerManager playerManager = GodHand.get(GodHand.K.MediaPlayerManager);
-            if (playerManager.stateInfo().playStatus) {
-                playerManager.pause();
+            IMediaPlayer player = GodHand.get(GodHand.K.IMediaPlayer);
+            if (player.getStatus() == IMediaPlayer.Status.PLAYING) {
+                player.pause(true);
                 btn.setText("暂停中");
                 btn.setIcon(Icons.Standard.VIDEO_PAUSE);
             } else {
-                playerManager.play();
+                player.pause(false);
                 btn.setText("播放中");
                 btn.setIcon(Icons.Standard.VIDEO_PLAY);
             }
         }));
 
-        videoToolBar.add(new SimpleButton("刷新", Icons.Standard.VIDEO_REFRESH, (e, btn) -> GodHand.exec(GodHand.K.MediaPlayerManager, MediaPlayerManager::refresh)));
+        videoToolBar.add(new SimpleButton("刷新", Icons.Standard.VIDEO_REFRESH, (e, btn) -> GodHand.exec(GodHand.K.IMediaPlayer, IMediaPlayer::refresh)));
 
         videoToolBar.addSeparator();
 
@@ -207,32 +198,27 @@ public class VideoManagerToolBar extends JPanel {
             });
         }));
 
-        videoToolBar.add(new SimpleButton("删除", Icons.Standard.FILE_DELETE, (e, btn) -> {
-            GodHand.<GroupItemListPanel>exec(GodHand.K.GroupItemListPanel, groupItemListPanel -> {
-                GroupItemListPanel.ItemPanel itemPanel = groupItemListPanel.customizeList.getSelectedValue();
-                if (itemPanel == null) return;
-                GodHand.<PlaylistService>exec(GodHand.K.PlaylistService, playlistService -> {
-                    if (itemPanel.getPlayViewItem() == null) return;
-                    playlistService.delete(itemPanel.getPlayViewItem());
-                });
-                refresh(itemPanel);
+        videoToolBar.add(new SimpleButton("删除", Icons.Standard.FILE_DELETE, (e, btn) -> GodHand.<GroupItemListPanel>exec(GodHand.K.GroupItemListPanel, groupItemListPanel -> {
+            GroupItemListPanel.ItemPanel itemPanel = groupItemListPanel.customizeList.getSelectedValue();
+            if (itemPanel == null) return;
+            GodHand.<PlaylistService>exec(GodHand.K.PlaylistService, playlistService -> {
+                if (itemPanel.getPlayViewItem() == null) return;
+                playlistService.delete(itemPanel.getPlayViewItem());
             });
-        }));
+            refresh(itemPanel);
+        })));
 
-        videoToolBar.add(new SimpleButton("可用", Icons.Standard.LIKE, (e, btn) -> {
-            GodHand.<GroupItemListPanel>exec(GodHand.K.GroupItemListPanel, groupItemListPanel -> {
-                GroupItemListPanel.ItemPanel itemPanel = groupItemListPanel.customizeList.getSelectedValue();
-                if (itemPanel == null) return;
-                if (itemPanel.favorite()) itemPanel.disLike();
-                else itemPanel.like();
-            });
-        }));
+        videoToolBar.add(new SimpleButton("可用", Icons.Standard.LIKE, (e, btn) ->
+                GodHand.<GroupItemListPanel>exec(GodHand.K.GroupItemListPanel, groupItemListPanel -> {
+                    GroupItemListPanel.ItemPanel itemPanel = groupItemListPanel.customizeList.getSelectedValue();
+                    if (itemPanel == null) return;
+                    if (itemPanel.favorite()) itemPanel.disLike();
+                    else itemPanel.like();
+                })));
 
         videoToolBar.addSeparator();
 
-        videoToolBar.add(new SimpleButton("清空", (e, btn) -> {
-            setPlayViewItem(new PlayViewItem());
-        }));
+        videoToolBar.add(new SimpleButton("清空", (e, btn) -> setPlayViewItem(new PlayViewItem())));
 
         videoToolBar.add(new SimpleButton("复制", (e, btn) -> {
             try {
@@ -291,12 +277,7 @@ public class VideoManagerToolBar extends JPanel {
             logoPanel.setTvLogo(playViewItem.getTvgLogo());
         }
         if (!autoplay) return;
-        GodHand.<MediaPlayerManager>exec(GodHand.K.MediaPlayerManager, playerManager -> {
-            String mediaUrl = playViewItem.getMediaUrl();
-            if (StrUtil.isNotBlank(mediaUrl)) {
-                playerManager.load(mediaUrl).play();
-            }
-        });
+        GodHand.<IMediaPlayer>exec(GodHand.K.IMediaPlayer, playerManager -> playerManager.play(playViewItem.getMediaUrl()));
     }
 
     public PlayViewItem getPlayViewItem(String id) {

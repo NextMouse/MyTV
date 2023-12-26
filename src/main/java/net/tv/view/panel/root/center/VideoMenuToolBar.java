@@ -2,8 +2,8 @@ package net.tv.view.panel.root.center;
 
 import cn.hutool.core.util.StrUtil;
 import net.tv.view.arm.GodHand;
+import net.tv.view.component.IMediaPlayer;
 import net.tv.view.component.Icons;
-import net.tv.view.component.MediaPlayerManager;
 import net.tv.view.component.SimpleButton;
 
 import javax.swing.*;
@@ -16,8 +16,6 @@ import static net.tv.view.arm.GodHand.K;
 
 public class VideoMenuToolBar extends JPanel {
 
-    private JTextField mediaLinkTextFiled = new JTextField();
-
     interface R {
         Insets BUTTON_MARGIN = new Insets(0, 5, 0, 10);
         Font TEXT_FIELD_FONT = new Font(Font.MONOSPACED, Font.PLAIN, 14);
@@ -26,6 +24,7 @@ public class VideoMenuToolBar extends JPanel {
     public VideoMenuToolBar() {
         setLayout(new BorderLayout());
         add(new JLabel("链接：", Icons.Standard.VIDEO, LEFT), BorderLayout.WEST);
+        JTextField mediaLinkTextFiled = new JTextField();
         mediaLinkTextFiled.setFont(R.TEXT_FIELD_FONT);
         add(mediaLinkTextFiled, BorderLayout.CENTER);
         GodHand.register(GodHand.K.MediaLinkTextFiled, mediaLinkTextFiled);
@@ -47,9 +46,11 @@ public class VideoMenuToolBar extends JPanel {
     private static SimpleButton getLoadButton() {
         SimpleButton loadButton = new SimpleButton("加 载", Icons.MIN.LOAD, (e, btn) -> {
             GodHand.<JTextField>exec(K.MediaLinkTextFiled, textField -> {
-                final String mediaLink = textField.getText();
-                if (StrUtil.isNotBlank(mediaLink)) {
-                    GodHand.<MediaPlayerManager>exec(K.MediaPlayerManager, playerManager -> playerManager.load(mediaLink).play());
+                final String mediaSrc = textField.getText();
+                if (StrUtil.isNotBlank(mediaSrc)) {
+                    GodHand.<IMediaPlayer>exec(K.IMediaPlayer, player -> {
+                        player.play(mediaSrc);
+                    });
                 }
             });
         });

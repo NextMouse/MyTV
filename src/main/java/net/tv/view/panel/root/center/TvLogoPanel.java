@@ -4,7 +4,6 @@ import cn.hutool.core.util.StrUtil;
 import net.tv.util.ImageDownloadUtil;
 import net.tv.view.arm.GodHand;
 import net.tv.view.component.Icons;
-import net.tv.view.component.MediaPlayerManager;
 
 import javax.swing.*;
 import javax.swing.border.Border;

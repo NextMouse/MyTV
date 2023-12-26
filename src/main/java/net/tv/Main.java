@@ -1,8 +1,6 @@
 package net.tv;
 
 import net.tv.view.WindowMain;
-import net.tv.view.arm.GodHand;
-import net.tv.view.component.MediaPlayerManager;
 
 public class Main {
 
