@@ -19,7 +19,7 @@ public class VlcPlayer implements IMediaPlayer {
 
     public VlcPlayer() {
         boolean discover = new NativeDiscovery().discover();
-        ConsoleLog.println("VLC Player {}, {}", (discover ? "已找到" : "未找到"));
+        ConsoleLog.println("VLC Player {}", (discover ? "已找到" : "未找到"));
 
         this.mediaPlayerComponent = new EmbeddedMediaPlayerComponent();
         this.mediaPlayerComponent.setBackground(Color.BLACK);
