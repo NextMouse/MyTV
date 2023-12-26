@@ -1,7 +1,6 @@
 package net.tv.util;
 
 import cn.hutool.core.util.StrUtil;
-import net.tv.view.arm.ConsoleLog;
 import net.tv.view.arm.GodHand;
 import net.tv.view.config.SystemConfig;
 import okhttp3.OkHttpClient;
@@ -24,7 +23,6 @@ public class HttpClient {
         String hostname = systemConfig.getTvgLogo().getHostname();
         String port = systemConfig.getTvgLogo().getPort();
         if (StrUtil.isNotBlank(hostname) && StrUtil.isNotBlank(port)) {
-            ConsoleLog.println("当前代理配置：{}:{}", hostname, port);
             Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(hostname, Integer.parseInt(port)));
             okHttpClientBuilder.proxy(proxy);
         }

@@ -84,10 +84,9 @@ public class VlcPlayer implements IMediaPlayer {
 
         @Override
         public void playing(MediaPlayer mediaPlayer) {
-            ConsoleLog.println("打开成功，视频宽高比[{}]，视频类型：{}，标题：{}",
-                    mediaPlayer.video().aspectRatio(),
-                    mediaPlayer.media().info().type(),
-                    mediaPlayer.video().trackDescriptions()
+            ConsoleLog.println("打开成功，宽高比[{}]，类型：{}",
+                    mediaPlayer.video().videoDimension(),
+                    mediaPlayer.media().info().type()
             );
         }
 
