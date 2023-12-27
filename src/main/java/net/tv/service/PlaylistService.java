@@ -10,7 +10,6 @@ import net.tv.m3u.PlayItem;
 import net.tv.m3u.Playlist;
 import net.tv.service.model.PlayItemAvailable;
 import net.tv.service.model.PlayViewItem;
-import net.tv.service.orm.PlayItemAvailableDao;
 import net.tv.service.orm.PlayViewItemDao;
 import net.tv.view.arm.ConsoleLog;
 
@@ -23,7 +22,6 @@ import java.util.stream.Collectors;
 public class PlaylistService {
 
     private final PlayViewItemDao playViewItemDao = new PlayViewItemDao();
-    private final PlayItemAvailableDao playItemAvailableDao = new PlayItemAvailableDao();
 
     private final static M3uParser m3uParser = new M3uParser();
 
@@ -56,13 +54,7 @@ public class PlaylistService {
 
     public List<PlayViewItem> getChannelTitleList(String groupTitle) {
         try {
-            List<PlayViewItem> playViewItemList = playViewItemDao.queryByGroupTitle(groupTitle);
-            if (CollectionUtil.isEmpty(playViewItemList)) return null;
-            for (PlayViewItem playViewItem : playViewItemList) {
-                PlayItemAvailable available = playItemAvailableDao.selectByMediaUrl(playViewItem.getMediaUrl());
-                playViewItem.setFavorite(available != null);
-            }
-            return playViewItemList;
+            return playViewItemDao.queryByGroupTitle(groupTitle);
         } catch (SQLException e) {
             ConsoleLog.println(e);
             return null;
@@ -76,11 +68,6 @@ public class PlaylistService {
                 playViewItemDao.insert(playViewItem);
             } else {
                 playViewItemDao.update(playViewItem);
-            }
-            if (playViewItem.getFavorite() == Boolean.TRUE) {
-                playItemAvailableDao.insert(new PlayItemAvailable(playViewItem.getMediaUrl()));
-            } else {
-                playItemAvailableDao.delete(new PlayItemAvailable(playViewItem.getMediaUrl()));
             }
         } catch (SQLException e) {
             ConsoleLog.println(e);

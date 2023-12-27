@@ -4,6 +4,8 @@ import cn.hutool.core.collection.CollectionUtil;
 import lombok.Getter;
 import net.tv.service.PlaylistService;
 import net.tv.service.model.PlayViewItem;
+import net.tv.util.GIFResizer;
+import net.tv.util.ImageDownloadUtil;
 import net.tv.view.arm.GodHand;
 import net.tv.view.component.CustomizeComponent;
 import net.tv.view.component.Icons;
@@ -72,11 +74,11 @@ public class GroupItemListPanel extends ScrollListAndTitlePanel<GroupItemListPan
         };
     }
 
-    public class ItemPanel extends JPanel {
+    public static class ItemPanel extends JPanel {
 
         interface R {
-            Dimension BTN_SIZE = new Dimension(30, 30);
-            Insets BTN_MARGIN = new Insets(3, 3, 5, 3);
+            Dimension LOGO_SIZE = new Dimension(50, 40);
+            Dimension LOADING_SIZE = new Dimension(35, 35);
         }
 
         /**
@@ -89,51 +91,36 @@ public class GroupItemListPanel extends ScrollListAndTitlePanel<GroupItemListPan
 
         public ItemPanel(PlayViewItem playViewItem) {
             this.playViewItem = playViewItem;
-            // 电视台名称
-            tvTitleLabel = new JLabel(playViewItem.getChannelTitle());
-            // 加心收藏
-            JButton favoriteBtn = new JButton();
-            favoriteBtn.setIcon(playViewItem.getFavorite() ? Icons.Standard.LIKE : Icons.Standard.DISLIKE);
-            favoriteBtn.setPreferredSize(R.BTN_SIZE);
-            favoriteBtn.setMargin(R.BTN_MARGIN);
-            favoriteBtn.setBackground(null);
+
+            // 电台图标
+            final JLabel tvLogo = getTvLogoLabel(playViewItem.getTvgLogo());
 
             // 设置布局
             setLayout(new BorderLayout());
 
             // 添加组件
-            add(favoriteBtn, BorderLayout.WEST);
+            add(tvLogo, BorderLayout.WEST);
+
+            // 电视台名称
+            tvTitleLabel = new JLabel(playViewItem.getChannelTitle());
             add(tvTitleLabel, BorderLayout.CENTER);
 
             setBackground(null);
         }
 
-        public void like() {
-            playViewItem.setFavorite(true);
-            GodHand.<PlaylistService>exec(GodHand.K.PlaylistService, playlistService -> {
-                playlistService.addOrUpdate(playViewItem);
-            });
-            GodHand.<GroupListPanel>exec(GodHand.K.GroupListPanel, itemPanel -> {
-                refresh(itemPanel.customizeList.getSelectedValue().getTrimText(), customizeList.getSelectedIndex());
-            });
-        }
-
-        public void disLike() {
-            playViewItem.setFavorite(false);
-            GodHand.<PlaylistService>exec(GodHand.K.PlaylistService, playlistService -> {
-                playlistService.addOrUpdate(playViewItem);
-            });
-            GodHand.<GroupListPanel>exec(GodHand.K.GroupListPanel, itemPanel -> {
-                refresh(itemPanel.customizeList.getSelectedValue().getTrimText(), customizeList.getSelectedIndex());
-            });
-        }
-
-        public boolean favorite() {
-            return playViewItem.getFavorite();
+        private JLabel getTvLogoLabel(String logoUrl) {
+            JLabel tvLogo = new JLabel();
+            ImageDownloadUtil.download(logoUrl,
+                    () -> tvLogo.setIcon(GIFResizer.resize(Icons.LOADING_TV_LOGO, R.LOADING_SIZE)),
+                    imageIcon -> tvLogo.setIcon(Icons.shrinkToPanelSize(imageIcon, R.LOGO_SIZE)),
+                    (url) -> tvLogo.setIcon(Icons.Standard.TV));
+            tvLogo.setHorizontalAlignment(SwingConstants.CENTER);
+            tvLogo.setPreferredSize(R.LOGO_SIZE);
+            tvLogo.setBackground(null);
+            return tvLogo;
         }
 
 
     }
-
 
 }

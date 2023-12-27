@@ -3,7 +3,6 @@ package net.tv.util;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpStatus;
 import net.tv.service.model.PlayViewItem;
-import net.tv.util.HttpClient;
 import net.tv.view.arm.ConsoleLog;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -29,7 +28,7 @@ public class SearchTvUtil {
         try {
             ConsoleLog.println("SearchTv 正在搜索...");
             Request request = new Request.Builder().url(String.format(R.URL_SEARCH, pageIndex, value)).build();
-            Response response = HttpClient.getClient().newCall(request).execute();
+            Response response = HttpClient.getProxyClient().newCall(request).execute();
             if (response.body() != null && response.code() == HttpStatus.HTTP_OK) {
                 String html = IOUtils.toString(response.body().byteStream());
                 Document document = Jsoup.parse(html, R.URL_BASE);
@@ -45,7 +44,7 @@ public class SearchTvUtil {
                 ConsoleLog.println("SearchTv 共查询到{}个节目.", viewItemList.size());
             }
         } catch (Exception ex) {
-            ConsoleLog.println("SearchTv 搜索异常:{}", ex.getMessage());
+            ConsoleLog.println("SearchTv 搜索异常：{}", ex.getMessage());
         }
         return viewItemList;
     }

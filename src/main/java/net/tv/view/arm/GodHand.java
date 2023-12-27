@@ -40,7 +40,7 @@ public final class GodHand {
         try {
             consumer.accept(get(key));
         } catch (Exception e) {
-            ConsoleLog.println("GodHand Error : {}", e.getMessage());
+            ConsoleLog.println("GodHand Error：{}", e.getMessage());
         }
     }
 

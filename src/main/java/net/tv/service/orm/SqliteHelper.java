@@ -2,13 +2,14 @@ package net.tv.service.orm;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
-import net.tv.view.config.SystemConfig;
 import net.tv.view.arm.ConsoleLog;
+import net.tv.view.config.SystemConfig;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Objects;
 
 public class SqliteHelper {
 
@@ -17,19 +18,15 @@ public class SqliteHelper {
     }
 
     public enum Type {
-        TempDB(SystemConfig.TEMP_DB_FILE_PATH, "tempdb.sql"), TvDB(SystemConfig.DB_FILE_PATH, "tvdb.sql");
+        TempDB(SystemConfig.TEMP_DB_FILE_PATH, "tempdb.sql");
 
-        private String name;
+        private final String name;
 
-        private String initSqlPath;
+        private final String initSqlPath;
 
         Type(String name, String initSqlPath) {
             this.name = name;
             this.initSqlPath = initSqlPath;
-        }
-
-        public String getName() {
-            return name;
         }
 
     }
@@ -49,21 +46,14 @@ public class SqliteHelper {
     }
 
     private Connection tempDBConnection;
-    private Connection tvDBConnection;
 
     private void tryConnection() {
         try {
             if (tempDBConnection == null) {
                 tempDBConnection = DriverManager.getConnection("jdbc:sqlite:" + Type.TempDB.name);
                 tempDBConnection.createStatement()
-                                .execute(FileUtil.readString(ResourceUtil.getResource(Type.TempDB.initSqlPath),
-                                                             StandardCharsets.UTF_8));
-            }
-            if (tvDBConnection == null) {
-                tvDBConnection = DriverManager.getConnection("jdbc:sqlite:" + Type.TvDB.name);
-                tvDBConnection.createStatement()
-                              .execute(FileUtil.readString(ResourceUtil.getResource(Type.TvDB.initSqlPath),
-                                                           StandardCharsets.UTF_8));
+                        .execute(FileUtil.readString(ResourceUtil.getResource(Type.TempDB.initSqlPath),
+                                StandardCharsets.UTF_8));
             }
         } catch (Exception e) {
             ConsoleLog.println(e.getMessage());
@@ -73,11 +63,8 @@ public class SqliteHelper {
     public Connection getConnection(Type type) {
         try {
             tryConnection();
-            switch (type) {
-                case TvDB:
-                    return tvDBConnection;
-                case TempDB:
-                    return tempDBConnection;
+            if (Objects.requireNonNull(type) == Type.TempDB) {
+                return tempDBConnection;
             }
         } catch (Exception e) {
             ConsoleLog.println(e.getMessage());

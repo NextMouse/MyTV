@@ -7,7 +7,6 @@ import cn.hutool.http.HttpUtil;
 import net.tv.m3u.M3uParser;
 import net.tv.m3u.Playlist;
 import net.tv.service.model.PlayViewItem;
-import net.tv.util.HttpClient;
 import net.tv.view.arm.ConsoleLog;
 import net.tv.view.arm.GodHand;
 import net.tv.view.config.SystemConfig;
@@ -45,26 +44,26 @@ public class SearchSourceTvUtil {
     }
 
     private static List<PlayViewItem> getPlayViewItemsByFile(String sourceUrl, String searchValue) {
-        ConsoleLog.println("SourceTv 正在解析: {}", sourceUrl);
+        ConsoleLog.println("SourceTv 正在解析：{}", sourceUrl);
         try {
             Playlist playlist = new M3uParser().parseAndSearch(FileUtil.getInputStream(sourceUrl), searchValue);
             return playlist.getItems().stream().map(PlayViewItem::getByPlayItem).toList();
         } catch (Exception ex) {
-            ConsoleLog.println("SourceTv 解析失败: {}, error:{}", sourceUrl, ex.getMessage());
+            ConsoleLog.println("SourceTv 解析失败：{}, error：{}", sourceUrl, ex.getMessage());
         }
         return new ArrayList<>();
     }
 
     private static List<PlayViewItem> getPlayViewItems(String sourceUrl, String searchValue) throws IOException {
         Request request = new Request.Builder().url(sourceUrl).build();
-        Response response = HttpClient.getClient().newCall(request).execute();
+        Response response = HttpClient.getProxyClient().newCall(request).execute();
         if (response.body() != null && response.code() == HttpStatus.HTTP_OK) {
-            ConsoleLog.println("SourceTv 正在解析: {}", sourceUrl);
+            ConsoleLog.println("SourceTv 正在解析：{}", sourceUrl);
             try {
                 Playlist playlist = new M3uParser().parseAndSearch(response.body().byteStream(), searchValue);
                 return playlist.getItems().stream().map(PlayViewItem::getByPlayItem).toList();
             } catch (Exception ex) {
-                ConsoleLog.println("SourceTv 解析失败: {}, error:{}", sourceUrl, ex.getMessage());
+                ConsoleLog.println("SourceTv 解析失败：{}, error：{}", sourceUrl, ex.getMessage());
             }
 
         }
