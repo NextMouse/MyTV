@@ -2,6 +2,7 @@ package net.tv.view.panel.root.right;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import net.tv.service.model.PlayViewItem;
 import net.tv.util.AsyncUtil;
 import net.tv.util.SearchSourceTvUtil;
@@ -13,6 +14,8 @@ import net.tv.view.panel.root.center.VideoManagerToolBar;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -150,14 +153,35 @@ public class RightPanel extends JPanel {
     }
 
     private CustomizeList<SearchResultPanel> getSearchResultPanel() {
-        return new CustomizeList<>(getCustomizeComponent(), selectedItem -> {
+        CustomizeList<SearchResultPanel> customizeList = new CustomizeList<>(getCustomizeComponent(), selectedItem -> {
             if (selectedItem == null) return;
             GodHand.<VideoManagerToolBar>exec(GodHand.K.VideoManagerToolBar, videoToolBar -> {
-                GodHand.<JTextField>exec(GodHand.K.MediaLinkTextFiled, mediaLink -> mediaLink.setCaretPosition(0));
+                GodHand.<JTextField>exec(GodHand.K.MediaLinkTextFiled, mediaLink -> {
+                    mediaLink.setText(selectedItem.getPlayViewItem().getMediaUrl());
+                    mediaLink.setCaretPosition(0);
+                });
                 // 搜索结果只播放
-                GodHand.<IMediaPlayer>asyncExec(GodHand.K.IMediaPlayer, player -> player.play(selectedItem.getPlayViewItem().getMediaUrl()));
+                GodHand.<IMediaPlayer>exec(GodHand.K.IMediaPlayer, player -> {
+                    player.play(selectedItem.getPlayViewItem().getMediaUrl());
+                });
             });
         });
+        customizeList.setMouseRightClickEvent((mouseEvent, item) -> {
+            JPopupMenu popupMenu = new JPopupMenu();
+            JMenuItem menuItem = new JMenuItem("复制");
+            popupMenu.add(menuItem);
+            menuItem.addActionListener(e -> {
+                try {
+                    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                    clipboard.setContents(new StringSelection(JSONUtil.toJsonPrettyStr(item.getPlayViewItem())), null);
+                    ConsoleLog.println("复制成功！");
+                } catch (Exception ex) {
+                    // ignore
+                }
+            });
+            popupMenu.show(mouseEvent.getComponent(), mouseEvent.getX(), mouseEvent.getY());
+        });
+        return customizeList;
     }
 
     private void addResultList(CustomizeList<SearchResultPanel> panel, List<PlayViewItem> itemList) {
@@ -205,7 +229,6 @@ public class RightPanel extends JPanel {
                 comp.setBackground(Color.PINK);
                 comp.getResultPanel().setBackground(Color.PINK);
             }
-
 
         };
     }

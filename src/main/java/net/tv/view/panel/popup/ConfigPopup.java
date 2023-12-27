@@ -3,7 +3,6 @@ package net.tv.view.panel.popup;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import net.tv.view.WindowMain;
-import net.tv.view.arm.ConsoleLog;
 import net.tv.view.arm.GodHand;
 import net.tv.view.component.FieldItem;
 import net.tv.view.config.ProxyConfig;
@@ -48,7 +47,7 @@ public class ConfigPopup extends JDialog {
         root.add(openDirPath);
         root.add(proxyHostname);
         root.add(proxyPort);
-        root.add(new JLabel(" m3u静态源列表："));
+        root.add(new JLabel(" m3u资源地址列表："));
         add(root, BorderLayout.NORTH);
 
         tvSourceArea = new JTextArea();
@@ -93,7 +92,6 @@ public class ConfigPopup extends JDialog {
     public void open() {
         SystemConfig systemConfig = GodHand.get(GodHand.K.SystemConfig);
         String themeName = systemConfig.getTheme().getSystem().toString();
-        ConsoleLog.println("当前主题：{}", themeName);
         themeCombo.setSelectedItem(themeName);
         openDirPath.setFieldValue(systemConfig.getOpenDirPath());
         proxyHostname.setFieldValue(systemConfig.getTvgLogo().getHostname());

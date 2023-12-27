@@ -1,0 +1,5 @@
+REM 这是一个bat运行jar模板，将X.X.X替换为自己需要运行的版本号
+@echo off
+chcp 65001
+start javaw -noverify -jar -Dfile.encoding=utf8 ./MyTV-X.X.X-jar-with-dependencies.jar
+exit

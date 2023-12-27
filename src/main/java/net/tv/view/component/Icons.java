@@ -19,7 +19,6 @@ import static org.apache.batik.util.SVGConstants.SVG_SVG_TAG;
 public interface Icons {
 
     interface R {
-        String PNG = ".png";
         String SVG = ".svg";
     }
 
@@ -36,25 +35,25 @@ public interface Icons {
         ImageIcon SIZE_MIN = loadImage("icons/Minimize-1.svg", SIZE);
         ImageIcon SIZE_MAX = loadImage("icons/Maximize-3.svg", SIZE);
         ImageIcon SIZE_NOT_MAX = loadImage("icons/Maximize-1.svg", SIZE);
-        ImageIcon CLOSE = loadImage("icons/Shut down-1.svg", SIZE);
+        ImageIcon CLOSE = loadImage("icons/Shutdown-1.svg", SIZE);
         ImageIcon EXPORT = loadImage("icons/收件下载_inbox-in.svg", SIZE);
         ImageIcon FILE_OPEN = loadImage("icons/视频文件_video-file.svg", SIZE);
-        ImageIcon FILE_SAVE = loadImage("icons/保存_save.svg", SIZE);
-        ImageIcon FILE_DELETE = loadImage("icons/删除_delete-four.svg", SIZE);
         ImageIcon VIDEO_PLAY = loadImage("icons/播放_play.svg", SIZE);
         ImageIcon VIDEO_PAUSE = loadImage("icons/暂停_pause-one.svg", SIZE);
-        ImageIcon VIDEO_REFRESH = loadImage("icons/刷新_refresh.svg", SIZE);
+        ImageIcon VIDEO_REFRESH = loadImage("icons/重新播放_replay-music.svg", SIZE);
         ImageIcon VIDEO_VOLUME_OPEN = loadImage("icons/声音-大_volume-notice.svg", SIZE);
         ImageIcon VIDEO_VOLUME_CLOSE = loadImage("icons/静音_volume-mute.svg", SIZE);
         ImageIcon VIDEO = loadImage("icons/视频_video.svg", SIZE);
         ImageIcon LIKE = loadImage("icons/喜欢_like.svg", SIZE);
         ImageIcon DISLIKE = loadImage("icons/不喜欢_dislike-two.svg", SIZE);
-        ImageIcon FACE_HAPPY = loadImage("icons/开心_emotion-happy.svg", SIZE);
         ImageIcon FACE_CLEAR = loadImage("icons/格式刷_format-brush.svg", SIZE);
         ImageIcon LIGHTNING = loadImage("icons/闪电_lightning.svg", SIZE);
         ImageIcon CONFIG = loadImage("icons/设置_setting-two.svg", SIZE);
         ImageIcon DISTINCT = loadImage("icons/清除格式_clear-format.svg", SIZE);
         ImageIcon SEARCH = loadImage("icons/搜索_search.svg", SIZE);
+        ImageIcon ADD = loadImage("icons/添加_add-one.svg", SIZE);
+        ImageIcon UPDATE = loadImage("icons/更新_update-rotation.svg", SIZE);
+        ImageIcon DELETE = loadImage("icons/删除_delete-four.svg", SIZE);
     }
 
     interface MIN {

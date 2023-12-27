@@ -38,8 +38,9 @@ public class VlcPlayer implements IMediaPlayer {
             ConsoleLog.println("请输入媒体地址");
             return;
         }
+        this.stop();
         this.src = src;
-        this.mediaPlayerComponent.mediaPlayer().media().start(src);
+        this.mediaPlayerComponent.mediaPlayer().media().play(src);
         this.status = Status.PLAYING;
     }
 
@@ -76,6 +77,13 @@ public class VlcPlayer implements IMediaPlayer {
         return this.status;
     }
 
+    @Override
+    public void release() {
+        if (this.mediaPlayerComponent.mediaPlayer() != null) {
+            this.mediaPlayerComponent.release();
+        }
+    }
+
     static class MediaPlayerEventListener extends MediaPlayerEventAdapter {
         @Override
         public void opening(MediaPlayer mediaPlayer) {
@@ -84,8 +92,9 @@ public class VlcPlayer implements IMediaPlayer {
 
         @Override
         public void playing(MediaPlayer mediaPlayer) {
+            Dimension videoDimension = mediaPlayer.video().videoDimension();
             ConsoleLog.println("打开成功，宽高比[{}]，类型：{}",
-                    mediaPlayer.video().videoDimension(),
+                    videoDimension == null ? "未知" : videoDimension.getWidth() + "×" + videoDimension.getHeight(),
                     mediaPlayer.media().info().type()
             );
         }

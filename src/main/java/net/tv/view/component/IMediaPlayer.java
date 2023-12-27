@@ -27,4 +27,5 @@ public interface IMediaPlayer {
 
     Status getStatus();
 
+    void release();
 }

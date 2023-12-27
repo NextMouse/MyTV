@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import net.tv.service.PlaylistService;
 import net.tv.view.arm.ConsoleLog;
 import net.tv.view.arm.GodHand;
+import net.tv.view.component.IMediaPlayer;
 import net.tv.view.component.Icons;
 import net.tv.view.config.SystemConfig;
 import net.tv.view.config.ThemeConfig;
@@ -23,15 +24,17 @@ public class WindowMain extends JFrame {
 
 
     private interface R {
-        Dimension SIZE = new Dimension(1200, 750);
-        Dimension SIZE_MIN = new Dimension(800, 500);
         Border DEFAULT_BORDER = new EmptyBorder(1, 1, 1, 1);
     }
 
     private WindowMain() {
+
+        // 获取屏幕大小
+        final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
         // 设置大小
-        setSize(R.SIZE);
-        setMinimumSize(R.SIZE_MIN);
+        setSize(new Dimension((int) (screenSize.getWidth() / 1.5), (int) (screenSize.getHeight() / 1.5)));
+        setMinimumSize(new Dimension((int) (screenSize.getWidth() / 4), (int) (screenSize.getHeight() / 4)));
         // 设置位置
         setLocationRelativeTo(null);
         // 设置布局
@@ -42,6 +45,7 @@ public class WindowMain extends JFrame {
             public void windowClosing(WindowEvent e) {
                 try {
                     GodHand.exec(GodHand.K.SystemConfig, SystemConfig::save);
+                    GodHand.exec(GodHand.K.IMediaPlayer, IMediaPlayer::refresh);
                 } catch (Exception ex) {
                     // ignore
                 }

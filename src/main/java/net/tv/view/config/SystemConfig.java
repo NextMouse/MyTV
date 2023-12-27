@@ -9,7 +9,6 @@ import cn.hutool.core.util.StrUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import net.tv.view.arm.ConsoleLog;
 
 import javax.swing.filechooser.FileSystemView;
 import java.io.File;
@@ -133,7 +132,6 @@ public class SystemConfig {
             });
         }
         FileUtil.writeString(StrUtil.utf8Str(sb.toString()), new File(SYSTEM_CONFIG_URL), StandardCharsets.UTF_8);
-        ConsoleLog.println("保存配置 ==> {}", SYSTEM_CONFIG_URL);
     }
 
 }

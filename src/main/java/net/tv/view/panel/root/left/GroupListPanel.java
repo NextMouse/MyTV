@@ -57,9 +57,7 @@ public class GroupListPanel extends ScrollListAndTitlePanel<GroupListPanel.Group
                 throw new RuntimeException(ex);
             }
         });
-        // 添加组件
         GodHand.register(GodHand.K.GroupListPanel, this);
-        // 自定义
     }
 
 
@@ -81,7 +79,7 @@ public class GroupListPanel extends ScrollListAndTitlePanel<GroupListPanel.Group
     public BiConsumer<MouseEvent, GroupItem> getMouseConsumer() {
         return (mouseEvent, item) -> {
             JPopupMenu popupMenu = new JPopupMenu();
-            JMenuItem menuItem = new JMenuItem("更改组名", Icons.Standard.FACE_HAPPY);
+            JMenuItem menuItem = new JMenuItem("更改组名");
             popupMenu.add(menuItem);
             menuItem.addActionListener(e -> new ChangeGroupTitlePopup().open(item.getTrimText()));
             popupMenu.show(mouseEvent.getComponent(), mouseEvent.getX(), mouseEvent.getY());

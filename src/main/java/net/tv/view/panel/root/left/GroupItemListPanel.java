@@ -28,7 +28,9 @@ public class GroupItemListPanel extends ScrollListAndTitlePanel<GroupItemListPan
     public GroupItemListPanel() {
         super(R.TITLE, 150, itemPanel -> {
             if (itemPanel == null) return;
-            GodHand.<VideoManagerToolBar>exec(GodHand.K.VideoManagerToolBar, videoToolBar -> videoToolBar.setPlayViewItem(itemPanel.playViewItem));
+            GodHand.<VideoManagerToolBar>exec(GodHand.K.VideoManagerToolBar, videoToolBar -> {
+                videoToolBar.setPlayViewItem(itemPanel.playViewItem);
+            });
         });
         // 添加组件
         GodHand.register(GodHand.K.GroupItemListPanel, this);

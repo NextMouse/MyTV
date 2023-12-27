@@ -25,7 +25,6 @@ public class JavaFxPlayer implements IMediaPlayer {
 
     private final MediaView mediaView;
     private String src;
-    private double volume;
     private Status status;
 
     private interface R {
@@ -74,7 +73,6 @@ public class JavaFxPlayer implements IMediaPlayer {
         }
         this.src = src;
         this.createMediaPlayer(src);
-        this.volume = this.mediaView.getMediaPlayer().getVolume();
         this.mediaView.getMediaPlayer().setAutoPlay(true);
         this.status = Status.PLAYING;
     }
@@ -111,7 +109,6 @@ public class JavaFxPlayer implements IMediaPlayer {
     public void volume(double volume) {
         if (this.mediaView.getMediaPlayer() != null) {
             this.mediaView.getMediaPlayer().setVolume(volume);
-            this.volume = volume;
         }
     }
 
@@ -125,6 +122,13 @@ public class JavaFxPlayer implements IMediaPlayer {
     @Override
     public Status getStatus() {
         return this.status;
+    }
+
+    @Override
+    public void release() {
+        if (this.mediaView.getMediaPlayer() != null) {
+            this.mediaView.getMediaPlayer().dispose();
+        }
     }
 
     public static class PlayerErrorHandler implements EventHandler<MediaErrorEvent> {

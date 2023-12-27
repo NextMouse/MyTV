@@ -48,7 +48,7 @@ public class VideoMenuToolBar extends JPanel {
             GodHand.<JTextField>exec(K.MediaLinkTextFiled, textField -> {
                 final String mediaSrc = textField.getText();
                 if (StrUtil.isNotBlank(mediaSrc)) {
-                    GodHand.<IMediaPlayer>asyncExec(K.IMediaPlayer, player -> player.play(mediaSrc));
+                    GodHand.<IMediaPlayer>exec(K.IMediaPlayer, player -> player.play(mediaSrc));
                 }
             });
         });

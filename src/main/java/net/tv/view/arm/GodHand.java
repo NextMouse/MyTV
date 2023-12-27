@@ -1,7 +1,5 @@
 package net.tv.view.arm;
 
-import net.tv.util.AsyncUtil;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -44,10 +42,6 @@ public final class GodHand {
         } catch (Exception e) {
             ConsoleLog.println("GodHand Error : {}", e.getMessage());
         }
-    }
-
-    public static <T> void asyncExec(K key, Consumer<T> consumer) {
-        AsyncUtil.exec(()->exec(key, consumer));
     }
 
 }

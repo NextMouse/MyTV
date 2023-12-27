@@ -119,10 +119,6 @@ public class VideoManagerToolBar extends JPanel {
         return attrPanel;
     }
 
-    public void setVolumeSliderEnabled(boolean enabled) {
-        volumeSlider.setEnabled(enabled);
-    }
-
     private JToolBar getVideoToolBar() {
         JToolBar videoToolBar = new JToolBar();
         FlowLayout flowLayout = new FlowLayout(FlowLayout.RIGHT);
@@ -133,12 +129,13 @@ public class VideoManagerToolBar extends JPanel {
         videoToolBar.setFloatable(false);
         videoToolBar.setBorderPainted(false);
 
-        videoToolBar.add(new SimpleButton("声音:", Icons.Standard.VIDEO_VOLUME_OPEN, (e, btn) -> {
+        videoToolBar.add(new SimpleButton("", Icons.Standard.VIDEO_VOLUME_OPEN, (e, btn) -> {
             IMediaPlayer mediaPlayer = GodHand.get(GodHand.K.IMediaPlayer);
             if ("已静音".equals(btn.getText())) { // 准备打开
                 btn.setText("");
                 btn.setIcon(Icons.Standard.VIDEO_VOLUME_OPEN);
                 volumeSlider.setVisible(true);
+                volumeSlider.setEnabled(true);
                 mediaPlayer.mute(false);
             } else { // 准备静音
                 btn.setText("已静音");
@@ -151,7 +148,7 @@ public class VideoManagerToolBar extends JPanel {
         volumeSlider.setValue(100);
         volumeSlider.setPreferredSize(new Dimension(80, 20));
         volumeSlider.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        setVolumeSliderEnabled(false);
+        volumeSlider.setEnabled(false);
         volumeSlider.addChangeListener(e -> {
             JSlider slider = (JSlider) e.getSource();
             GodHand.<IMediaPlayer>exec(GodHand.K.IMediaPlayer, player -> player.volume(slider.getValue()));
@@ -171,11 +168,11 @@ public class VideoManagerToolBar extends JPanel {
             }
         }));
 
-        videoToolBar.add(new SimpleButton("刷新", Icons.Standard.VIDEO_REFRESH, (e, btn) -> GodHand.asyncExec(GodHand.K.IMediaPlayer, IMediaPlayer::refresh)));
+        videoToolBar.add(new SimpleButton("刷新", Icons.Standard.VIDEO_REFRESH, (e, btn) -> GodHand.exec(GodHand.K.IMediaPlayer, IMediaPlayer::refresh)));
 
         videoToolBar.addSeparator();
 
-        videoToolBar.add(new SimpleButton("新增", Icons.Standard.FILE_SAVE, (e, btn) -> {
+        videoToolBar.add(new SimpleButton("新增", Icons.Standard.ADD, (e, btn) -> {
             PlayViewItem playViewItem = getPlayViewItem(null);
             if (playViewItem == null) return;
             lastGroupTitle = groupTitleItem.getFieldValue();
@@ -185,7 +182,7 @@ public class VideoManagerToolBar extends JPanel {
             refresh(itemPanel);
         }));
 
-        videoToolBar.add(new SimpleButton("更新", Icons.Standard.FILE_SAVE, (e, btn) -> {
+        videoToolBar.add(new SimpleButton("更新", Icons.Standard.UPDATE, (e, btn) -> {
             PlayViewItem playViewItem = getPlayViewItem(null);
             if (playViewItem == null) return;
             lastGroupTitle = groupTitleItem.getFieldValue();
@@ -198,7 +195,7 @@ public class VideoManagerToolBar extends JPanel {
             });
         }));
 
-        videoToolBar.add(new SimpleButton("删除", Icons.Standard.FILE_DELETE, (e, btn) -> GodHand.<GroupItemListPanel>exec(GodHand.K.GroupItemListPanel, groupItemListPanel -> {
+        videoToolBar.add(new SimpleButton("删除", Icons.Standard.DELETE, (e, btn) -> GodHand.<GroupItemListPanel>exec(GodHand.K.GroupItemListPanel, groupItemListPanel -> {
             GroupItemListPanel.ItemPanel itemPanel = groupItemListPanel.customizeList.getSelectedValue();
             if (itemPanel == null) return;
             GodHand.<PlaylistService>exec(GodHand.K.PlaylistService, playlistService -> {
@@ -277,7 +274,7 @@ public class VideoManagerToolBar extends JPanel {
             logoPanel.setTvLogo(playViewItem.getTvgLogo());
         }
         if (!autoplay) return;
-        GodHand.<IMediaPlayer>asyncExec(GodHand.K.IMediaPlayer, playerManager -> playerManager.play(playViewItem.getMediaUrl()));
+        GodHand.<IMediaPlayer>exec(GodHand.K.IMediaPlayer, playerManager -> playerManager.play(playViewItem.getMediaUrl()));
     }
 
     public PlayViewItem getPlayViewItem(String id) {
