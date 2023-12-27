@@ -24,7 +24,6 @@ public class SystemConfig {
 
     public static final String SYSTEM_CONFIG_URL = R.SYSTEM_CONFIG_PATH + "/my-tv.conf";
     public static final String TEMP_DB_FILE_PATH = R.SYSTEM_CONFIG_PATH + "/temp.db";
-    public static final String DB_FILE_PATH = R.SYSTEM_CONFIG_PATH + "/my-tv.db";
 
     private ThemeConfig theme;
 
@@ -124,12 +123,11 @@ public class SystemConfig {
                         .toString())
                 .append(separator);
         if (CollectionUtil.isNotEmpty(tvSources)) {
-            tvSources.forEach(tvSourceUrl -> {
-                sb.append(R.TV_SOURCES)
-                        .append("=")
-                        .append(tvSourceUrl)
-                        .append(separator);
-            });
+            tvSources.forEach(tvSourceUrl ->
+                    sb.append(R.TV_SOURCES)
+                            .append("=")
+                            .append(tvSourceUrl)
+                            .append(separator));
         }
         FileUtil.writeString(StrUtil.utf8Str(sb.toString()), new File(SYSTEM_CONFIG_URL), StandardCharsets.UTF_8);
     }

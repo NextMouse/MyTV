@@ -12,9 +12,11 @@ import javafx.scene.media.MediaErrorEvent;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
+import net.tv.util.MediaUtil;
 import net.tv.view.arm.ConsoleLog;
 import net.tv.view.arm.GodHand;
 import net.tv.view.component.IMediaPlayer;
+import net.tv.view.config.SystemConfig;
 
 import javax.swing.*;
 import java.awt.*;
@@ -72,6 +74,7 @@ public class JavaFxPlayer implements IMediaPlayer {
             return;
         }
         this.src = src;
+        ConsoleLog.println("当前播放：{}", src);
         this.createMediaPlayer(src);
         this.mediaView.getMediaPlayer().setAutoPlay(true);
         this.status = Status.PLAYING;

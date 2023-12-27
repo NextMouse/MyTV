@@ -6,6 +6,7 @@ public interface IMediaPlayer {
 
     enum Status {
         INIT,    // 初始化
+        LOADING, // 加载中
         PLAYING, // 播放中
         STOPPED, // 停止中
         PAUSED,  // 暂停中

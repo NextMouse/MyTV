@@ -31,8 +31,6 @@ public class PlayViewItem implements Serializable {
 
     private String channelTitle;
 
-    private Boolean favorite = false;
-
     private String tvgId;
 
     private String tvgName;
@@ -50,7 +48,6 @@ public class PlayViewItem implements Serializable {
                 .duration(playItem.getExtInf()
                         .getDuration())
                 .groupTitle(playItem.getAttrValue(GroupTitle))
-                .favorite(false)
                 .channelTitle(playItem.getChannelTitle())
                 .tvgId(playItem.getAttrValue(TvgId))
                 .tvgName(playItem.getAttrValue(TvgName))

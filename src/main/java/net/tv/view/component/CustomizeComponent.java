@@ -6,9 +6,11 @@ import java.awt.*;
 public interface CustomizeComponent<T extends JComponent> {
 
     interface R {
-        Color DEFAULT_FOREGROUND = Color.decode("#C0C6C9");
-        Color MOVED_FOREGROUND = Color.decode("#424C50");
-        Color MOVED_BACKGROUND = Color.decode("#C0EBD7");
+        Color DEFAULT_FOREGROUND = Color.decode("#4B5CC4");
+        Color MOVED_FOREGROUND = Color.decode("#4B5CC4");
+        Color MOVED_BACKGROUND = Color.decode("#F3F9F1");
+        Color SELECTED_FOREGROUND = Color.decode("#003472");
+        Color SELECTED_BACKGROUND = Color.decode("#2ADD9C");
     }
 
     default void onInitialize(JList<T> jList, T comp) {
@@ -23,8 +25,8 @@ public interface CustomizeComponent<T extends JComponent> {
     }
 
     default void onSelected(JList<T> jList, T comp) {
-        comp.setForeground(Color.WHITE);
-        comp.setBackground(Color.PINK);
+        comp.setForeground(R.SELECTED_FOREGROUND);
+        comp.setBackground(R.SELECTED_BACKGROUND);
     }
 
     default void onMouseMoved(JList<T> jList, T comp) {

@@ -66,7 +66,6 @@ public class GroupListPanel extends ScrollListAndTitlePanel<GroupListPanel.Group
             super("  " + text);
             setOpaque(true);
         }
-
         public String getTrimText() {
             return super.getText().trim();
         }

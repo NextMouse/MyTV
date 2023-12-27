@@ -22,9 +22,9 @@ public class ConfigPopup extends JDialog {
 
     private JComboBox<String> themeCombo;
 
-    private final FieldItem proxyHostname;
+    private FieldItem proxyHostname;
 
-    private final FieldItem proxyPort;
+    private FieldItem proxyPort;
 
     private final JTextArea tvSourceArea;
 
@@ -36,17 +36,14 @@ public class ConfigPopup extends JDialog {
         super(GodHand.<JFrame>get(GodHand.K.WindowMain), "系统配置", true);
 
         openDirPath = new FieldItem("默认打开文件夹");
-        proxyHostname = new FieldItem("图片加载代理地址");
-        proxyPort = new FieldItem("图片加载代理端口");
 
         JPanel root = new JPanel();
 
-        root.setLayout(new GridLayout(5, 1, 5, 5));
+        root.setLayout(new GridLayout(4, 1, 5, 5));
 
         root.add(getThemeBox());
         root.add(openDirPath);
-        root.add(proxyHostname);
-        root.add(proxyPort);
+        root.add(getProxyBox());
         root.add(new JLabel(" m3u资源地址列表："));
         add(root, BorderLayout.NORTH);
 
@@ -67,6 +64,20 @@ public class ConfigPopup extends JDialog {
         setSize(R.DIALOG_SIZE);
         setResizable(false);
         setLocationRelativeTo(null);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                dispose();
+            }
+        });
+    }
+
+    private JPanel getProxyBox() {
+        this.proxyHostname = new FieldItem("图片代理", "代理地址");
+        this.proxyPort = new FieldItem(null, "端口号");
+        this.proxyHostname.add(this.proxyPort, BorderLayout.EAST);
+        return this.proxyHostname;
     }
 
     private JPanel getThemeBox() {
@@ -98,6 +109,7 @@ public class ConfigPopup extends JDialog {
         proxyPort.setFieldValue(systemConfig.getTvgLogo().getPort());
         if (CollectionUtil.isNotEmpty(systemConfig.getTvSources())) {
             tvSourceArea.setText(String.join(System.lineSeparator(), systemConfig.getTvSources()));
+            tvSourceArea.setCaretPosition(0);
         }
         setVisible(true);
     }
@@ -120,4 +132,5 @@ public class ConfigPopup extends JDialog {
         Object selectedItem = themeCombo.getSelectedItem();
         return selectedItem != null ? selectedItem.toString() : null;
     }
+
 }

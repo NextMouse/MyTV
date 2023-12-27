@@ -100,7 +100,7 @@ public class PlayViewItemDao {
     private AbstractListHandler<PlayViewItem> resultListHandler = new AbstractListHandler<>() {
         @Override
         protected PlayViewItem handleRow(ResultSet resultSet) throws SQLException {
-            return PlayViewItem.builder().id(resultSet.getString("id")).groupTitle(resultSet.getString("groupTitle")).channelTitle(resultSet.getString("channelTitle")).duration(resultSet.getInt("duration")).tvgId(resultSet.getString("tvgId")).tvgName(resultSet.getString("tvgName")).tvgLogo(resultSet.getString("tvgLogo")).aspectRatio(resultSet.getString("aspectRatio")).mediaUrl(resultSet.getString("mediaUrl")).favorite(false).build();
+            return PlayViewItem.builder().id(resultSet.getString("id")).groupTitle(resultSet.getString("groupTitle")).channelTitle(resultSet.getString("channelTitle")).duration(resultSet.getInt("duration")).tvgId(resultSet.getString("tvgId")).tvgName(resultSet.getString("tvgName")).tvgLogo(resultSet.getString("tvgLogo")).aspectRatio(resultSet.getString("aspectRatio")).mediaUrl(resultSet.getString("mediaUrl")).build();
         }
     };
 

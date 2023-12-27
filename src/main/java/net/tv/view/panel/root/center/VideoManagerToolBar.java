@@ -5,6 +5,7 @@ import cn.hutool.json.JSONUtil;
 import com.formdev.flatlaf.util.StringUtils;
 import net.tv.service.PlaylistService;
 import net.tv.service.model.PlayViewItem;
+import net.tv.util.AsyncUtil;
 import net.tv.view.arm.ConsoleLog;
 import net.tv.view.arm.GodHand;
 import net.tv.view.component.FieldItem;
@@ -27,13 +28,13 @@ import static java.awt.GridBagConstraints.REMAINDER;
 public class VideoManagerToolBar extends JPanel {
 
     private final TvLogoPanel logoPanel = new TvLogoPanel();
-    private final FieldItem groupTitleItem = new FieldItem("group-title");
-    private final FieldItem titleItem = new FieldItem("title");
-    private final FieldItem durationItem = new FieldItem("duration");
-    private final FieldItem tvgIdItem = new FieldItem("tvg-id");
-    private final FieldItem tvgNameItem = new FieldItem("tvg-name");
-    private final FieldItem tvgLogoItem = new FieldItem("tvg-logo");
-    private final FieldItem urlItem = new FieldItem("url");
+    private final FieldItem groupTitleItem = new FieldItem("分组名称");
+    private final FieldItem titleItem = new FieldItem("节目名称");
+    private final FieldItem durationItem = new FieldItem("持续时间");
+    private final FieldItem tvgIdItem = new FieldItem("台标编号");
+    private final FieldItem tvgNameItem = new FieldItem("台标名称");
+    private final FieldItem tvgLogoItem = new FieldItem("台标图片");
+    private final FieldItem urlItem = new FieldItem("节目地址");
     private final JTextArea consoleLogTextArea = new JTextArea();
     private final JSlider volumeSlider = new JSlider(0, 100);
 
@@ -205,14 +206,6 @@ public class VideoManagerToolBar extends JPanel {
             refresh(itemPanel);
         })));
 
-        videoToolBar.add(new SimpleButton("可用", Icons.Standard.LIKE, (e, btn) ->
-                GodHand.<GroupItemListPanel>exec(GodHand.K.GroupItemListPanel, groupItemListPanel -> {
-                    GroupItemListPanel.ItemPanel itemPanel = groupItemListPanel.customizeList.getSelectedValue();
-                    if (itemPanel == null) return;
-                    if (itemPanel.favorite()) itemPanel.disLike();
-                    else itemPanel.like();
-                })));
-
         videoToolBar.addSeparator();
 
         videoToolBar.add(new SimpleButton("清空", (e, btn) -> setPlayViewItem(new PlayViewItem())));
@@ -274,7 +267,7 @@ public class VideoManagerToolBar extends JPanel {
             logoPanel.setTvLogo(playViewItem.getTvgLogo());
         }
         if (!autoplay) return;
-        GodHand.<IMediaPlayer>exec(GodHand.K.IMediaPlayer, playerManager -> playerManager.play(playViewItem.getMediaUrl()));
+        AsyncUtil.exec(() -> GodHand.<IMediaPlayer>exec(GodHand.K.IMediaPlayer, playerManager -> playerManager.play(playViewItem.getMediaUrl())));
     }
 
     public PlayViewItem getPlayViewItem(String id) {

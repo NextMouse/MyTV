@@ -1,6 +1,7 @@
 package net.tv.view.component.impl;
 
 import cn.hutool.core.util.StrUtil;
+import net.tv.util.AsyncUtil;
 import net.tv.view.arm.ConsoleLog;
 import net.tv.view.component.IMediaPlayer;
 import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery;
@@ -10,21 +11,28 @@ import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.concurrent.TimeUnit;
 
 public class VlcPlayer implements IMediaPlayer {
 
-    private final EmbeddedMediaPlayerComponent mediaPlayerComponent;
+    private EmbeddedMediaPlayerComponent mediaPlayerComponent;
     private String src;
     private Status status;
 
     public VlcPlayer() {
         boolean discover = new NativeDiscovery().discover();
         ConsoleLog.println("VLC Player {}", (discover ? "已找到" : "未找到"));
+        createEmbeddedMediaPlayerComponent();
+    }
 
+    private void createEmbeddedMediaPlayerComponent() {
         this.mediaPlayerComponent = new EmbeddedMediaPlayerComponent();
         this.mediaPlayerComponent.setBackground(Color.BLACK);
-
         this.mediaPlayerComponent.mediaPlayer().events().addMediaPlayerEventListener(new MediaPlayerEventListener());
+    }
+
+    public MediaPlayer getMediaPlayer() {
+        return this.mediaPlayerComponent.mediaPlayer();
     }
 
     @Override
@@ -38,10 +46,15 @@ public class VlcPlayer implements IMediaPlayer {
             ConsoleLog.println("请输入媒体地址");
             return;
         }
-        this.stop();
         this.src = src;
-        this.mediaPlayerComponent.mediaPlayer().media().play(src);
-        this.status = Status.PLAYING;
+        this.status = Status.LOADING;
+        AsyncUtil.exec(() -> {
+            ConsoleLog.println("当前播放：{}", src);
+            getMediaPlayer().media().play(src);
+            this.status = Status.PLAYING;
+
+        }, 5, TimeUnit.SECONDS);
+
     }
 
     @Override
@@ -52,24 +65,28 @@ public class VlcPlayer implements IMediaPlayer {
 
     @Override
     public void stop() {
-        mediaPlayerComponent.mediaPlayer().controls().stop();
-        this.status = Status.STOPPED;
+        if (getMediaPlayer().status().isPlaying()) {
+            getMediaPlayer().controls().stop();
+            this.status = Status.STOPPED;
+        }
     }
 
     @Override
     public void pause(boolean pause) {
-        mediaPlayerComponent.mediaPlayer().controls().pause();
-        this.status = Status.PAUSED;
+        if (getMediaPlayer().status().isPlaying()) {
+            getMediaPlayer().controls().pause();
+            this.status = Status.PAUSED;
+        }
     }
 
     @Override
     public void volume(double volume) {
-        mediaPlayerComponent.mediaPlayer().audio().setVolume((int) volume);
+        getMediaPlayer().audio().setVolume((int) volume);
     }
 
     @Override
     public void mute(boolean mute) {
-        mediaPlayerComponent.mediaPlayer().audio().setMute(mute);
+        getMediaPlayer().audio().setMute(mute);
     }
 
     @Override
@@ -79,30 +96,21 @@ public class VlcPlayer implements IMediaPlayer {
 
     @Override
     public void release() {
-        if (this.mediaPlayerComponent.mediaPlayer() != null) {
-            this.mediaPlayerComponent.release();
+        if (getMediaPlayer() != null) {
+            getMediaPlayer().release();
         }
     }
 
     static class MediaPlayerEventListener extends MediaPlayerEventAdapter {
         @Override
-        public void opening(MediaPlayer mediaPlayer) {
-            ConsoleLog.println("正在打开：{}", mediaPlayer.media().info().mrl());
-        }
-
-        @Override
         public void playing(MediaPlayer mediaPlayer) {
             Dimension videoDimension = mediaPlayer.video().videoDimension();
-            ConsoleLog.println("打开成功，宽高比[{}]，类型：{}",
+            ConsoleLog.println("打开成功，宽高比：[{}]，类型：{}",
                     videoDimension == null ? "未知" : videoDimension.getWidth() + "×" + videoDimension.getHeight(),
                     mediaPlayer.media().info().type()
             );
         }
 
-        @Override
-        public void error(MediaPlayer mediaPlayer) {
-            ConsoleLog.println("播放错误");
-        }
     }
 
 }

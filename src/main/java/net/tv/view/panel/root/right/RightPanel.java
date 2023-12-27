@@ -226,8 +226,8 @@ public class RightPanel extends JPanel {
                 comp.getMediaUrlLabel().setForeground(R.MOVED_FOREGROUND);
                 comp.setForeground(R.MOVED_FOREGROUND);
                 comp.getResultPanel().setForeground(R.MOVED_FOREGROUND);
-                comp.setBackground(Color.PINK);
-                comp.getResultPanel().setBackground(Color.PINK);
+                comp.setBackground(R.SELECTED_BACKGROUND);
+                comp.getResultPanel().setBackground(R.SELECTED_BACKGROUND);
             }
 
         };

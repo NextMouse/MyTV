@@ -28,6 +28,7 @@ public class VideoPanel extends JPanel {
         }
         add(mediaPlayer.getJComponentPanel(), BorderLayout.CENTER);
         GodHand.register(GodHand.K.IMediaPlayer, mediaPlayer);
+
     }
 
 }
