@@ -9,10 +9,17 @@
 ![image](https://github.com/NextMouse/MyTV/assets/11313291/f13226a1-8243-4e6e-b38f-07a933280537)
 
 ### 使用方法
+- 若想使用Java 8版本，请自行编译
 1. 本地支持Java 17
 2. 下载Release版本
 3. 运行run.bat
-- 若想使用Java 8版本，请自行编译
+```bat
+REM 这是一个bat运行jar模板，将X.X.X替换为自己需要运行的版本号
+@echo off
+chcp 65001
+start javaw -noverify -jar -Dfile.encoding=utf8 ./MyTV-X.X.X-jar-with-dependencies.jar
+exit
+```
 
 ## 功能点
 ### 1. 打开本地m3u文件
