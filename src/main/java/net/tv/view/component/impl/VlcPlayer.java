@@ -26,8 +26,8 @@ public class VlcPlayer implements IMediaPlayer {
 
     private void createEmbeddedMediaPlayer() {
         this.mediaPlayer = mediaPlayerComponent.mediaPlayerFactory().mediaPlayers().newEmbeddedMediaPlayer();
-        this.mediaPlayer.videoSurface().set(mediaPlayerComponent.mediaPlayerFactory().videoSurfaces().newVideoSurface(mediaPlayerComponent.videoSurfaceComponent()));
         this.mediaPlayer.events().addMediaPlayerEventListener(new MediaPlayerEventListener());
+        this.mediaPlayer.videoSurface().set(mediaPlayerComponent.mediaPlayerFactory().videoSurfaces().newVideoSurface(mediaPlayerComponent.videoSurfaceComponent()));
         System.gc();
     }
 
@@ -38,12 +38,20 @@ public class VlcPlayer implements IMediaPlayer {
 
     @Override
     public void play(String src) {
-        if (Status.LOADING == getStatus()) {
-            createEmbeddedMediaPlayer();
-        }
         this.src = src;
+//        if (Status.INIT != getStatus()) {
+//            createEmbeddedMediaPlayer();
+//        }
+        if (this.status != Status.PLAYING) {
+            stop();
+        }
         this.status = Status.LOADING;
-        this.mediaPlayer.media().play(src);
+        try {
+            this.mediaPlayer.media().play(src);
+        } catch (Exception ex) {
+            // ignore
+            ex.printStackTrace();
+        }
         this.status = Status.PLAYING;
     }
 

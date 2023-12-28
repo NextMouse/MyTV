@@ -1,9 +1,9 @@
 package net.tv.view.panel.root.center;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
 import com.formdev.flatlaf.util.StringUtils;
 import lombok.Getter;
+import net.tv.m3u.M3uParser;
 import net.tv.service.PlaylistService;
 import net.tv.service.model.PlayViewItem;
 import net.tv.util.AsyncUtil;
@@ -23,6 +23,8 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
+import java.util.Arrays;
+import java.util.List;
 
 import static java.awt.GridBagConstraints.BOTH;
 import static java.awt.GridBagConstraints.REMAINDER;
@@ -217,7 +219,7 @@ public class VideoManagerToolBar extends JPanel {
             try {
                 PlayViewItem playViewItem = getPlayViewItem(null);
                 Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                clipboard.setContents(new StringSelection(JSONUtil.toJsonPrettyStr(playViewItem)), null);
+                clipboard.setContents(new StringSelection(playViewItem.getPlayItem().toString()), null);
                 ConsoleLog.println("复制成功！");
             } catch (Exception ex) {
                 // ignore
@@ -232,8 +234,9 @@ public class VideoManagerToolBar extends JPanel {
                 Transferable contents = clipboard.getContents(null);
                 // 将内容转换为字符串类型并输出
                 try {
-                    Object obj = contents.getTransferData(DataFlavor.stringFlavor);
-                    PlayViewItem playViewItem = JSONUtil.toBean(obj.toString(), PlayViewItem.class);
+                    String objStr = contents.getTransferData(DataFlavor.stringFlavor).toString();
+                    List<String> lines = Arrays.asList(objStr.split("\n"));
+                    PlayViewItem playViewItem = PlayViewItem.getByPlayItem(new M3uParser().parseOne(lines));
                     setPlayViewItem(playViewItem, false);
                     ConsoleLog.println("粘贴成功！");
                 } catch (Exception ex) {

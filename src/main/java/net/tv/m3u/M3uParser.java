@@ -25,6 +25,20 @@ public class M3uParser {
         return parseAndSearch(inputStream, null);
     }
 
+    public PlayItem parseOne(List<String> lines) throws M3uFileFormatException {
+        List<String> notBlankLines = lines.stream().filter(e -> !e.isBlank()).toList();
+        if (notBlankLines.isEmpty()) return null;
+        String line1 = notBlankLines.get(0);
+        ExtInfInfo extInfInfo = parseExtInf(line1);
+        PlayItem playItem = PlayItem.builder().extInf(extInfInfo).mediaList(new ArrayList<>()).build();
+        Map<AttrKey, String> attributes = parseExtInfoAttrs(extInfInfo.getRawAttrs());
+        extInfInfo.setAttributes(attributes);
+        if (notBlankLines.size() > 1) {
+            playItem.getMediaList().add(notBlankLines.get(1));
+        }
+        return playItem;
+    }
+
     public Playlist parseAndSearch(InputStream inputStream, String searchValue) {
         assert inputStream != null;
         Playlist playlist = new Playlist();
@@ -86,7 +100,6 @@ public class M3uParser {
         }
         return new LineInfo(line, initNum);
     }
-
 
     private static final Pattern MEDIA_REGEX = Pattern.compile("[^#]+://\\S*", Pattern.CASE_INSENSITIVE);
 
