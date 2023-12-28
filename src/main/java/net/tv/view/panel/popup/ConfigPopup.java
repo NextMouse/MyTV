@@ -125,6 +125,7 @@ public class ConfigPopup extends JDialog {
             systemConfig.setTvSources(Arrays.stream(lines).filter(StrUtil::isNotBlank).map(String::trim).toList());
         }
         systemConfig.save();
+        this.dispose();
     }
 
 

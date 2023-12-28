@@ -9,7 +9,11 @@ import net.tv.util.SearchSourceTvUtil;
 import net.tv.util.SearchTvUtil;
 import net.tv.view.arm.ConsoleLog;
 import net.tv.view.arm.GodHand;
-import net.tv.view.component.*;
+import net.tv.view.component.CustomizeComponent;
+import net.tv.view.component.CustomizeList;
+import net.tv.view.component.Icons;
+import net.tv.view.component.SimpleButton;
+import net.tv.view.component.impl.MediaPlayerProxy;
 import net.tv.view.panel.root.center.VideoManagerToolBar;
 
 import javax.swing.*;
@@ -161,7 +165,7 @@ public class RightPanel extends JPanel {
                     mediaLink.setCaretPosition(0);
                 });
                 // 搜索结果只播放
-                GodHand.<IMediaPlayer>exec(GodHand.K.IMediaPlayer, player -> {
+                GodHand.<MediaPlayerProxy>exec(GodHand.K.MediaPlayerProxy, player -> {
                     player.play(selectedItem.getPlayViewItem().getMediaUrl());
                 });
             });

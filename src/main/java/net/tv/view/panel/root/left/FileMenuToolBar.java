@@ -1,6 +1,5 @@
 package net.tv.view.panel.root.left;
 
-import cn.hutool.core.collection.CollectionUtil;
 import net.tv.service.PlaylistService;
 import net.tv.service.orm.SqliteHelper;
 import net.tv.view.arm.ConsoleLog;
@@ -8,13 +7,13 @@ import net.tv.view.arm.GodHand;
 import net.tv.view.component.Icons;
 import net.tv.view.component.SimpleButton;
 import net.tv.view.config.SystemConfig;
+import net.tv.view.panel.popup.OpenHttpFilePopup;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class FileMenuToolBar extends JToolBar {
@@ -35,9 +34,15 @@ public class FileMenuToolBar extends JToolBar {
                 File file = fileChooser.getSelectedFile();
                 systemConfig.setOpenDirPath(file.getParent());
                 systemConfig.save();
-                GodHand.<PlaylistService>exec(GodHand.K.PlaylistService, service -> service.readFile(file));
-                showGroupPanel();
+                GodHand.<PlaylistService>exec(GodHand.K.PlaylistService, service -> {
+                    service.readFile(file);
+                    GodHand.exec(GodHand.K.GroupListPanel, GroupListPanel::showGroupPanel);
+                });
             }
+        }));
+
+        componentList.add(new SimpleButton("网络", Icons.Standard.HTTP_FILE, (e, btn) -> {
+            new OpenHttpFilePopup().open();
         }));
 
         componentList.add(new SimpleButton("导出", Icons.Standard.EXPORT, (e, btn) -> {
@@ -79,27 +84,12 @@ public class FileMenuToolBar extends JToolBar {
         componentList.add(new SimpleButton("去重", Icons.Standard.DISTINCT, (e, btn) -> {
             try {
                 GodHand.exec(GodHand.K.PlaylistService, PlaylistService::distinct);
-                showGroupPanel();
+                GodHand.exec(GodHand.K.GroupListPanel, GroupListPanel::showGroupPanel);
             } catch (Exception ex) {
                 ConsoleLog.println(ex);
             }
         }));
 
-    }
-
-    public void showGroupPanel() {
-        GodHand.<PlaylistService>exec(GodHand.K.PlaylistService, service -> {
-            List<String> groupTitleList = service.getByGroupTitle();
-            if (CollectionUtil.isNotEmpty(groupTitleList)) {
-                GodHand.<GroupListPanel>exec(GodHand.K.GroupListPanel, groupListPanel -> {
-                    if (groupListPanel.customizeList.getSelectedValue() != null) {
-                        groupListPanel.refresh(groupListPanel.customizeList.getSelectedValue().getTrimText());
-                    } else {
-                        groupListPanel.refresh(null);
-                    }
-                });
-            }
-        });
     }
 
     public FileMenuToolBar() {

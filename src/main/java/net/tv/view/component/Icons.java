@@ -53,6 +53,7 @@ public interface Icons {
         ImageIcon UPDATE = loadImage("icons/更新_update-rotation.svg", SIZE);
         ImageIcon DELETE = loadImage("icons/删除_delete-four.svg", SIZE);
         ImageIcon TV = loadImage("icons/电视_tv.svg", SIZE);
+        ImageIcon HTTP_FILE = loadImage("icons/数据文件_data-file.svg", SIZE);
     }
 
     interface MIN {

@@ -1,38 +1,34 @@
 package net.tv.view.component.impl;
 
-import cn.hutool.core.util.StrUtil;
-import net.tv.util.AsyncUtil;
 import net.tv.view.arm.ConsoleLog;
 import net.tv.view.component.IMediaPlayer;
 import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter;
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
+import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.concurrent.TimeUnit;
 
 public class VlcPlayer implements IMediaPlayer {
-
-    private EmbeddedMediaPlayerComponent mediaPlayerComponent;
+    private final EmbeddedMediaPlayerComponent mediaPlayerComponent;
+    private EmbeddedMediaPlayer mediaPlayer;
     private String src;
     private Status status;
 
     public VlcPlayer() {
         boolean discover = new NativeDiscovery().discover();
         ConsoleLog.println("VLC Player {}", (discover ? "已找到" : "未找到"));
-        createEmbeddedMediaPlayerComponent();
-    }
-
-    private void createEmbeddedMediaPlayerComponent() {
         this.mediaPlayerComponent = new EmbeddedMediaPlayerComponent();
-        this.mediaPlayerComponent.setBackground(Color.BLACK);
-        this.mediaPlayerComponent.mediaPlayer().events().addMediaPlayerEventListener(new MediaPlayerEventListener());
+        this.mediaPlayer = this.mediaPlayerComponent.mediaPlayer();
     }
 
-    public MediaPlayer getMediaPlayer() {
-        return this.mediaPlayerComponent.mediaPlayer();
+    private void createEmbeddedMediaPlayer() {
+        this.mediaPlayer = mediaPlayerComponent.mediaPlayerFactory().mediaPlayers().newEmbeddedMediaPlayer();
+        this.mediaPlayer.videoSurface().set(mediaPlayerComponent.mediaPlayerFactory().videoSurfaces().newVideoSurface(mediaPlayerComponent.videoSurfaceComponent()));
+        this.mediaPlayer.events().addMediaPlayerEventListener(new MediaPlayerEventListener());
+        System.gc();
     }
 
     @Override
@@ -42,51 +38,43 @@ public class VlcPlayer implements IMediaPlayer {
 
     @Override
     public void play(String src) {
-        if (StrUtil.isBlank(src)) {
-            ConsoleLog.println("请输入媒体地址");
-            return;
+        if (Status.LOADING == getStatus()) {
+            createEmbeddedMediaPlayer();
         }
         this.src = src;
         this.status = Status.LOADING;
-        AsyncUtil.exec(() -> {
-            ConsoleLog.println("当前播放：{}", src);
-            getMediaPlayer().media().play(src);
-            this.status = Status.PLAYING;
-
-        }, 5, TimeUnit.SECONDS);
-
+        this.mediaPlayer.media().play(src);
+        this.status = Status.PLAYING;
     }
 
     @Override
     public void refresh() {
-        this.stop();
-        this.play(this.src);
+        if (this.mediaPlayer != null) {
+            this.stop();
+            this.play(this.src);
+        }
     }
 
     @Override
     public void stop() {
-        if (getMediaPlayer().status().isPlaying()) {
-            getMediaPlayer().controls().stop();
-            this.status = Status.STOPPED;
-        }
+        this.mediaPlayer.controls().stop();
+        this.status = Status.STOPPED;
     }
 
     @Override
     public void pause(boolean pause) {
-        if (getMediaPlayer().status().isPlaying()) {
-            getMediaPlayer().controls().pause();
-            this.status = Status.PAUSED;
-        }
+        this.mediaPlayer.controls().setPause(pause);
+        this.status = Status.PAUSED;
     }
 
     @Override
     public void volume(double volume) {
-        getMediaPlayer().audio().setVolume((int) volume);
+        this.mediaPlayer.audio().setVolume((int) volume);
     }
 
     @Override
     public void mute(boolean mute) {
-        getMediaPlayer().audio().setMute(mute);
+        this.mediaPlayer.audio().setMute(mute);
     }
 
     @Override
@@ -96,21 +84,23 @@ public class VlcPlayer implements IMediaPlayer {
 
     @Override
     public void release() {
-        if (getMediaPlayer() != null) {
-            getMediaPlayer().release();
-        }
+        this.src = null;
+        this.status = Status.DESTROYING;
+        this.mediaPlayer.release();
+        this.status = Status.DESTROYED;
     }
 
     static class MediaPlayerEventListener extends MediaPlayerEventAdapter {
         @Override
-        public void playing(MediaPlayer mediaPlayer) {
-            Dimension videoDimension = mediaPlayer.video().videoDimension();
-            ConsoleLog.println("打开成功，宽高比：[{}]，类型：{}",
-                    videoDimension == null ? "未知" : videoDimension.getWidth() + "×" + videoDimension.getHeight(),
-                    mediaPlayer.media().info().type()
-            );
+        public void mediaPlayerReady(MediaPlayer mediaPlayer) {
+            StringBuilder strBuilder = new StringBuilder("正在播放：");
+            final Dimension viedoDimension = mediaPlayer.video().videoDimension();
+            if (viedoDimension != null) {
+                strBuilder.append("[").append(viedoDimension.getWidth()).append("×").append(viedoDimension.getHeight()).append("]");
+            }
+            strBuilder.append(", ").append(mediaPlayer.media().info().mrl());
+            ConsoleLog.println(strBuilder.toString());
         }
-
     }
 
 }

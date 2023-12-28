@@ -2,9 +2,9 @@ package net.tv.view.panel.root.center;
 
 import cn.hutool.core.util.StrUtil;
 import net.tv.view.arm.GodHand;
-import net.tv.view.component.IMediaPlayer;
 import net.tv.view.component.Icons;
 import net.tv.view.component.SimpleButton;
+import net.tv.view.component.impl.MediaPlayerProxy;
 
 import javax.swing.*;
 import java.awt.*;
@@ -48,7 +48,7 @@ public class VideoMenuToolBar extends JPanel {
             GodHand.<JTextField>exec(K.MediaLinkTextFiled, textField -> {
                 final String mediaSrc = textField.getText();
                 if (StrUtil.isNotBlank(mediaSrc)) {
-                    GodHand.<IMediaPlayer>exec(K.IMediaPlayer, player -> player.play(mediaSrc));
+                    GodHand.<MediaPlayerProxy>exec(K.MediaPlayerProxy, player -> player.play(mediaSrc));
                 }
             });
         });

@@ -75,6 +75,7 @@ public class ChangeGroupTitlePopup extends JDialog {
 
     public void close() {
         setVisible(false);
+        this.dispose();
     }
 
 }

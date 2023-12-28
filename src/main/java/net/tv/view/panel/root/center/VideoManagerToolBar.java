@@ -3,6 +3,7 @@ package net.tv.view.panel.root.center;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.formdev.flatlaf.util.StringUtils;
+import lombok.Getter;
 import net.tv.service.PlaylistService;
 import net.tv.service.model.PlayViewItem;
 import net.tv.util.AsyncUtil;
@@ -12,6 +13,7 @@ import net.tv.view.component.FieldItem;
 import net.tv.view.component.IMediaPlayer;
 import net.tv.view.component.Icons;
 import net.tv.view.component.SimpleButton;
+import net.tv.view.component.impl.MediaPlayerProxy;
 import net.tv.view.panel.root.left.GroupItemListPanel;
 import net.tv.view.panel.root.left.GroupListPanel;
 
@@ -25,6 +27,7 @@ import java.awt.datatransfer.Transferable;
 import static java.awt.GridBagConstraints.BOTH;
 import static java.awt.GridBagConstraints.REMAINDER;
 
+@Getter
 public class VideoManagerToolBar extends JPanel {
 
     private final TvLogoPanel logoPanel = new TvLogoPanel();
@@ -131,7 +134,7 @@ public class VideoManagerToolBar extends JPanel {
         videoToolBar.setBorderPainted(false);
 
         videoToolBar.add(new SimpleButton("", Icons.Standard.VIDEO_VOLUME_OPEN, (e, btn) -> {
-            IMediaPlayer mediaPlayer = GodHand.get(GodHand.K.IMediaPlayer);
+            MediaPlayerProxy mediaPlayer = GodHand.get(GodHand.K.MediaPlayerProxy);
             if ("已静音".equals(btn.getText())) { // 准备打开
                 btn.setText("");
                 btn.setIcon(Icons.Standard.VIDEO_VOLUME_OPEN);
@@ -152,12 +155,12 @@ public class VideoManagerToolBar extends JPanel {
         volumeSlider.setEnabled(false);
         volumeSlider.addChangeListener(e -> {
             JSlider slider = (JSlider) e.getSource();
-            GodHand.<IMediaPlayer>exec(GodHand.K.IMediaPlayer, player -> player.volume(slider.getValue()));
+            GodHand.<MediaPlayerProxy>exec(GodHand.K.MediaPlayerProxy, player -> player.volume(slider.getValue()));
         });
         videoToolBar.add(volumeSlider);
 
         videoToolBar.add(new SimpleButton("播放中", Icons.Standard.VIDEO_PLAY, (e, btn) -> {
-            IMediaPlayer player = GodHand.get(GodHand.K.IMediaPlayer);
+            MediaPlayerProxy player = GodHand.get(GodHand.K.MediaPlayerProxy);
             if (player.getStatus() == IMediaPlayer.Status.PLAYING) {
                 player.pause(true);
                 btn.setText("暂停中");
@@ -169,7 +172,7 @@ public class VideoManagerToolBar extends JPanel {
             }
         }));
 
-        videoToolBar.add(new SimpleButton("刷新", Icons.Standard.VIDEO_REFRESH, (e, btn) -> GodHand.exec(GodHand.K.IMediaPlayer, IMediaPlayer::refresh)));
+        videoToolBar.add(new SimpleButton("刷新", Icons.Standard.VIDEO_REFRESH, (e, btn) -> GodHand.exec(GodHand.K.MediaPlayerProxy, MediaPlayerProxy::refresh)));
 
         videoToolBar.addSeparator();
 
@@ -267,7 +270,7 @@ public class VideoManagerToolBar extends JPanel {
             logoPanel.setTvLogo(playViewItem.getTvgLogo());
         }
         if (!autoplay) return;
-        AsyncUtil.exec(() -> GodHand.<IMediaPlayer>exec(GodHand.K.IMediaPlayer, playerManager -> playerManager.play(playViewItem.getMediaUrl())));
+        AsyncUtil.exec(() -> GodHand.<MediaPlayerProxy>exec(GodHand.K.MediaPlayerProxy, playerManager -> playerManager.play(playViewItem.getMediaUrl())));
     }
 
     public PlayViewItem getPlayViewItem(String id) {

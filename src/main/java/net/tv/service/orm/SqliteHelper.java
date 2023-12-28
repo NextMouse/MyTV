@@ -75,8 +75,10 @@ public class SqliteHelper {
 
     public void close() {
         try {
-            tempDBConnection.close();
-            tempDBConnection = null;
+            if (tempDBConnection != null) {
+                tempDBConnection.close();
+                tempDBConnection = null;
+            }
             FileUtil.del(Type.TempDB.name);
         } catch (SQLException e) {
             throw new RuntimeException(e);

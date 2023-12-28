@@ -2,8 +2,8 @@ package net.tv.view.panel.root.center;
 
 import net.tv.view.arm.ConsoleLog;
 import net.tv.view.arm.GodHand;
-import net.tv.view.component.IMediaPlayer;
 import net.tv.view.component.impl.JavaFxPlayer;
+import net.tv.view.component.impl.MediaPlayerProxy;
 import net.tv.view.component.impl.VlcPlayer;
 
 import javax.swing.*;
@@ -18,17 +18,15 @@ public class VideoPanel extends JPanel {
     public VideoPanel() {
         setLayout(new BorderLayout());
         setBackground(R.BACKGROUND_COLOR);
-
-        IMediaPlayer mediaPlayer;
+        MediaPlayerProxy mediaPlayerProxy;
         try {
-            mediaPlayer = new VlcPlayer();
+            mediaPlayerProxy = new MediaPlayerProxy(new VlcPlayer());
         } catch (Exception ex) {
             ConsoleLog.println("当前使用 JavaFX MediaPlayer");
-            mediaPlayer = new JavaFxPlayer();
+            mediaPlayerProxy = new MediaPlayerProxy(new JavaFxPlayer());
         }
-        add(mediaPlayer.getJComponentPanel(), BorderLayout.CENTER);
-        GodHand.register(GodHand.K.IMediaPlayer, mediaPlayer);
-
+        add(mediaPlayerProxy.getJComponentPanel(), BorderLayout.CENTER);
+        GodHand.register(GodHand.K.MediaPlayerProxy, mediaPlayerProxy);
     }
 
 }

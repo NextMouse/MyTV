@@ -1,6 +1,5 @@
 package net.tv.view.component.impl;
 
-import cn.hutool.core.util.StrUtil;
 import javafx.embed.swing.JFXPanel;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -12,11 +11,8 @@ import javafx.scene.media.MediaErrorEvent;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
-import net.tv.util.MediaUtil;
 import net.tv.view.arm.ConsoleLog;
-import net.tv.view.arm.GodHand;
 import net.tv.view.component.IMediaPlayer;
-import net.tv.view.config.SystemConfig;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,7 +26,8 @@ public class JavaFxPlayer implements IMediaPlayer {
     private Status status;
 
     private interface R {
-        Background DEFAULT_BACKGROUND = new Background(new BackgroundFill(Color.BLACK, null, null));
+        Background DEFAULT_BACKGROUND = new Background(
+                new BackgroundFill(Color.BLACK, null, null));
     }
 
     private final JFXPanel jfxPanel;
@@ -57,8 +54,6 @@ public class JavaFxPlayer implements IMediaPlayer {
             }
         });
 
-        GodHand.register(GodHand.K.IMediaPlayer, this);
-
         this.status = Status.INIT;
     }
 
@@ -69,12 +64,8 @@ public class JavaFxPlayer implements IMediaPlayer {
 
     @Override
     public void play(String src) {
-        if (StrUtil.isBlank(src)) {
-            ConsoleLog.println("请输入媒体地址");
-            return;
-        }
+        this.status = Status.LOADING;
         this.src = src;
-        ConsoleLog.println("当前播放：{}", src);
         this.createMediaPlayer(src);
         this.mediaView.getMediaPlayer().setAutoPlay(true);
         this.status = Status.PLAYING;
@@ -82,44 +73,36 @@ public class JavaFxPlayer implements IMediaPlayer {
 
     @Override
     public void refresh() {
-        this.createMediaPlayer(this.src);
-        this.mediaView.getMediaPlayer().setAutoPlay(true);
-        this.status = Status.PLAYING;
+        this.release();
+        this.play(this.src);
     }
 
     @Override
     public void stop() {
-        if (this.mediaView.getMediaPlayer() != null) {
-            this.mediaView.getMediaPlayer().stop();
-            this.status = Status.STOPPED;
-        }
+        this.mediaView.getMediaPlayer().stop();
+        this.status = Status.STOPPED;
     }
 
     @Override
     public void pause(boolean pause) {
-        if (this.mediaView.getMediaPlayer() != null) {
-            if (pause) {
-                this.mediaView.getMediaPlayer().pause();
-                this.status = Status.PAUSED;
-            } else {
-                this.mediaView.getMediaPlayer().play();
-                this.status = Status.PLAYING;
-            }
+        if (pause) {
+            this.mediaView.getMediaPlayer().pause();
+            this.status = Status.PAUSED;
+        } else {
+            this.status = Status.LOADING;
+            this.mediaView.getMediaPlayer().play();
+            this.status = Status.PLAYING;
         }
     }
 
     @Override
     public void volume(double volume) {
-        if (this.mediaView.getMediaPlayer() != null) {
-            this.mediaView.getMediaPlayer().setVolume(volume);
-        }
+        this.mediaView.getMediaPlayer().setVolume(volume);
     }
 
     @Override
     public void mute(boolean mute) {
-        if (this.mediaView.getMediaPlayer() != null) {
-            this.mediaView.getMediaPlayer().setMute(mute);
-        }
+        this.mediaView.getMediaPlayer().setMute(mute);
     }
 
     @Override
@@ -129,9 +112,10 @@ public class JavaFxPlayer implements IMediaPlayer {
 
     @Override
     public void release() {
-        if (this.mediaView.getMediaPlayer() != null) {
-            this.mediaView.getMediaPlayer().dispose();
-        }
+        this.status = Status.DESTROYING;
+        this.mediaView.getMediaPlayer().stop();
+        this.mediaView.getMediaPlayer().dispose();
+        this.status = Status.DESTROYED;
     }
 
     public static class PlayerErrorHandler implements EventHandler<MediaErrorEvent> {
@@ -142,10 +126,8 @@ public class JavaFxPlayer implements IMediaPlayer {
     }
 
     private void createMediaPlayer(String src) {
-        // 销毁旧的
         if (this.mediaView.getMediaPlayer() != null) {
-            this.mediaView.getMediaPlayer().stop();
-            this.mediaView.getMediaPlayer().dispose();
+            release();
         }
         final Media media = new Media(src);
         ConsoleLog.println("视频宽高比：[{}×{}]", media.getWidth(), media.getHeight());
