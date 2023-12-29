@@ -15,6 +15,7 @@ public final class GodHand {
         VideoManagerToolBar,
         SystemConfig,
         PlaylistService,
+        VideoPanel,
     }
 
     /**

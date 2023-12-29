@@ -55,6 +55,15 @@ public class VideoManagerToolBar extends JPanel {
 
         setLayout(new BorderLayout());
 
+        // URL增加播放按钮
+        urlItem.add(new SimpleButton(Icons.Standard.VIDEO_PLAY, "点击播放", (e, btn) -> {
+            final String mediaSrc = urlItem.getFieldValue();
+            if (StrUtil.isNotBlank(mediaSrc)) {
+                GodHand.<MediaPlayerProxy>exec(GodHand.K.MediaPlayerProxy, player -> player.play(mediaSrc));
+            }
+        }), BorderLayout.EAST);
+
+
         // 第一层 工具按钮
         JToolBar videoInfoToolBar = new JToolBar();
         videoInfoToolBar.add(new JLabel(R.CONSOLE_PREFIX));

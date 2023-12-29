@@ -38,7 +38,8 @@ public class RightPanel extends JPanel {
 
     private JTextField searchField;
     private final JButton nextSearchButton;
-
+    private final JButton moreButton = new JButton("更 多");
+    ;
     private final CustomizeList<SearchResultPanel> searchResultListPanel1;
     private final CustomizeList<SearchResultPanel> searchResultListPanel2;
 
@@ -69,10 +70,9 @@ public class RightPanel extends JPanel {
 
 
     private JButton getNextSearchButton() {
-        JButton button = new JButton("更 多");
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setVisible(false);
-        button.addActionListener(e -> AsyncUtil.exec(() -> {
+        moreButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        moreButton.setVisible(false);
+        moreButton.addActionListener(e -> AsyncUtil.exec(() -> {
             try {
                 int selectedIndex = searchResultListPanel1.getSelectedIndex();
                 searchPageIndex++;
@@ -86,7 +86,7 @@ public class RightPanel extends JPanel {
                 ConsoleLog.println(ex.getMessage());
             }
         }));
-        return button;
+        return moreButton;
     }
 
     private int searchPageIndex = 1;
@@ -102,6 +102,7 @@ public class RightPanel extends JPanel {
         toolBar.add(searchField);
 
         SimpleButton button = new SimpleButton("搜索", Icons.Standard.SEARCH, (e, btn) -> {
+            this.moreButton.setVisible(false);
             searchValue = searchField.getText();
             if (StrUtil.isNotBlank(searchValue)) {
                 final ExecutorService executor = Executors.newFixedThreadPool(2);
@@ -176,8 +177,9 @@ public class RightPanel extends JPanel {
             popupMenu.add(menuItem);
             menuItem.addActionListener(e -> {
                 try {
+                    PlayViewItem playViewItem = item.getPlayViewItem();
                     Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                    clipboard.setContents(new StringSelection(JSONUtil.toJsonPrettyStr(item.getPlayViewItem())), null);
+                    clipboard.setContents(new StringSelection(playViewItem.getPlayItem().toString()), null);
                     ConsoleLog.println("复制成功！");
                 } catch (Exception ex) {
                     // ignore

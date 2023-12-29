@@ -5,9 +5,12 @@ import cn.hutool.core.util.StrUtil;
 import net.tv.view.WindowMain;
 import net.tv.view.arm.GodHand;
 import net.tv.view.component.FieldItem;
+import net.tv.view.component.impl.JavaFxPlayer;
+import net.tv.view.component.impl.VlcPlayer;
 import net.tv.view.config.ProxyConfig;
 import net.tv.view.config.SystemConfig;
 import net.tv.view.config.ThemeConfig;
+import net.tv.view.panel.root.center.VideoPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,6 +18,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
+
+import static net.tv.view.component.impl.MediaPlayerProxy.MediaPlayerType;
 
 public class ConfigPopup extends JDialog {
 
@@ -27,6 +32,11 @@ public class ConfigPopup extends JDialog {
     private FieldItem proxyPort;
 
     private final JTextArea tvSourceArea;
+    private JRadioButton vlcRadio;
+    private JRadioButton javaFxRadio;
+
+    private MediaPlayerType selectedMediaPlayerType;
+    private MediaPlayerType initMediaPlayerType;
 
     interface R {
         Dimension DIALOG_SIZE = new Dimension(450, 280);
@@ -39,9 +49,10 @@ public class ConfigPopup extends JDialog {
 
         JPanel root = new JPanel();
 
-        root.setLayout(new GridLayout(4, 1, 5, 5));
+        root.setLayout(new GridLayout(5, 1, 5, 5));
 
         root.add(getThemeBox());
+        root.add(getMediaRadio());
         root.add(openDirPath);
         root.add(getProxyBox());
         root.add(new JLabel(" m3u资源地址列表："));
@@ -71,6 +82,20 @@ public class ConfigPopup extends JDialog {
                 dispose();
             }
         });
+    }
+
+    private JPanel getMediaRadio() {
+        this.vlcRadio = new JRadioButton("VLC Player");
+        this.javaFxRadio = new JRadioButton("JavaFX");
+        this.javaFxRadio.setSelected(true);
+        ButtonGroup group = new ButtonGroup();
+        group.add(vlcRadio);
+        group.add(javaFxRadio);
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panel.add(new JLabel(" 播放器："));
+        panel.add(vlcRadio);
+        panel.add(javaFxRadio);
+        return panel;
     }
 
     private JPanel getProxyBox() {
@@ -111,6 +136,23 @@ public class ConfigPopup extends JDialog {
             tvSourceArea.setText(String.join(System.lineSeparator(), systemConfig.getTvSources()));
             tvSourceArea.setCaretPosition(0);
         }
+        selectedMediaPlayerType = systemConfig.getMediaPlayerType();
+        if (selectedMediaPlayerType == MediaPlayerType.VLC) {
+            vlcRadio.setSelected(true);
+        }
+        initMediaPlayerType = systemConfig.getMediaPlayerType();
+        vlcRadio.addChangeListener(e -> {
+            JRadioButton button = (JRadioButton) e.getSource();
+            if (button.isSelected()) {
+                selectedMediaPlayerType = MediaPlayerType.VLC;
+            }
+        });
+        javaFxRadio.addChangeListener(e -> {
+            JRadioButton button = (JRadioButton) e.getSource();
+            if (button.isSelected()) {
+                selectedMediaPlayerType = MediaPlayerType.JavaFx;
+            }
+        });
         setVisible(true);
     }
 
@@ -124,6 +166,15 @@ public class ConfigPopup extends JDialog {
             String[] lines = tvSourceText.split("\n");
             systemConfig.setTvSources(Arrays.stream(lines).filter(StrUtil::isNotBlank).map(String::trim).toList());
         }
+        if (selectedMediaPlayerType != initMediaPlayerType) {
+            systemConfig.setMediaPlayerType(selectedMediaPlayerType);
+            if (selectedMediaPlayerType == MediaPlayerType.VLC) {
+                GodHand.<VideoPanel>exec(GodHand.K.VideoPanel, videoPanel -> videoPanel.changeMediaPlayer(new VlcPlayer()));
+            } else {
+                GodHand.<VideoPanel>exec(GodHand.K.VideoPanel, videoPanel -> videoPanel.changeMediaPlayer(new JavaFxPlayer()));
+            }
+        }
+
         systemConfig.save();
         this.dispose();
     }

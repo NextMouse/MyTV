@@ -33,6 +33,7 @@ public class JavaFxPlayer implements IMediaPlayer {
     private final JFXPanel jfxPanel;
 
     public JavaFxPlayer() {
+        ConsoleLog.println("当前播放器：JavaFx Player");
         this.jfxPanel = new JFXPanel();
 
         this.mediaView = new MediaView();
@@ -97,7 +98,7 @@ public class JavaFxPlayer implements IMediaPlayer {
 
     @Override
     public void volume(double volume) {
-        this.mediaView.getMediaPlayer().setVolume(volume);
+        this.mediaView.getMediaPlayer().setVolume(volume / 100);
     }
 
     @Override

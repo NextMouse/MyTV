@@ -9,6 +9,7 @@ import cn.hutool.core.util.StrUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import net.tv.view.component.impl.MediaPlayerProxy;
 
 import javax.swing.filechooser.FileSystemView;
 import java.io.File;
@@ -35,6 +36,8 @@ public class SystemConfig {
 
     private List<String> tvSources;
 
+    private MediaPlayerProxy.MediaPlayerType mediaPlayerType;
+
     public static SystemConfig getDefault() {
         return SystemConfig.builder()
                 .theme(ThemeConfig.getDefault())
@@ -42,15 +45,17 @@ public class SystemConfig {
                 .openDirPath(R.USER_HOME_PATH)
                 .exportDirPath(R.USER_HOME_PATH)
                 .tvSources(new ArrayList<>())
+                .mediaPlayerType(MediaPlayerProxy.MediaPlayerType.JavaFx)
                 .build();
     }
 
-    interface R {
+    public interface R {
         String SYSTEM_CONFIG_PATH = System.getProperty("user.dir");
         String USER_HOME_PATH = FileSystemView.getFileSystemView()
                 .getHomeDirectory()
                 .getAbsolutePath();
         String TV_SOURCES = "m3u.tv-sources";
+        String MEDIA_PLAYER = "media.player";
         String OPEN_DIR_PATH = "m3u.open-path";
         String EXPORT_DIR_PATH = "m3u.export-path";
         String THEME_BASE_PREFIX = "theme.";
@@ -85,6 +90,8 @@ public class SystemConfig {
                     config.tvgLogo.setPort(value);
                 } else if (key.equalsIgnoreCase(R.TV_SOURCES)) {
                     config.tvSources.add(value);
+                } else if (key.equalsIgnoreCase(R.MEDIA_PLAYER)) {
+                    config.setMediaPlayerType(MediaPlayerProxy.MediaPlayerType.get(value));
                 }
             }
             return config;
@@ -104,6 +111,10 @@ public class SystemConfig {
         sb.append(R.EXPORT_DIR_PATH)
                 .append("=")
                 .append(exportDirPath)
+                .append(separator);
+        sb.append(R.MEDIA_PLAYER)
+                .append("=")
+                .append(mediaPlayerType)
                 .append(separator);
         final String tvgLogoProxyHostName = tvgLogo.getHostname();
         final String tvgLogoProxyPort = String.valueOf(tvgLogo.getPort());

@@ -1,5 +1,6 @@
 package net.tv.view.component.impl;
 
+import com.sun.jna.Native;
 import net.tv.view.arm.ConsoleLog;
 import net.tv.view.component.IMediaPlayer;
 import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery;
@@ -17,9 +18,11 @@ public class VlcPlayer implements IMediaPlayer {
     private String src;
     private Status status;
 
+
     public VlcPlayer() {
         boolean discover = new NativeDiscovery().discover();
         ConsoleLog.println("VLC Player {}", (discover ? "已找到" : "未找到"));
+        Native.setProtected(true);
         this.mediaPlayerComponent = new EmbeddedMediaPlayerComponent();
         this.mediaPlayer = this.mediaPlayerComponent.mediaPlayer();
     }
@@ -39,20 +42,17 @@ public class VlcPlayer implements IMediaPlayer {
     @Override
     public void play(String src) {
         this.src = src;
-//        if (Status.INIT != getStatus()) {
-//            createEmbeddedMediaPlayer();
-//        }
         if (this.status != Status.PLAYING) {
             stop();
         }
         this.status = Status.LOADING;
         try {
             this.mediaPlayer.media().play(src);
+            this.status = Status.PLAYING;
         } catch (Exception ex) {
             // ignore
             ex.printStackTrace();
         }
-        this.status = Status.PLAYING;
     }
 
     @Override
@@ -71,8 +71,10 @@ public class VlcPlayer implements IMediaPlayer {
 
     @Override
     public void pause(boolean pause) {
-        this.mediaPlayer.controls().setPause(pause);
-        this.status = Status.PAUSED;
+        if (getStatus() == IMediaPlayer.Status.PLAYING) {
+            this.mediaPlayer.controls().setPause(pause);
+            this.status = Status.PAUSED;
+        }
     }
 
     @Override

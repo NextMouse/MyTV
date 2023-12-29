@@ -21,6 +21,18 @@ public class MediaPlayerProxy {
         this.mediaPlayer = mediaPlayer;
     }
 
+    public enum MediaPlayerType {
+        JavaFx,
+        VLC;
+
+        public static MediaPlayerType get(String str) {
+            if ("VLC".equalsIgnoreCase(str)) {
+                return VLC;
+            }
+            return JavaFx;
+        }
+    }
+
     public void play(String src) {
         if (StrUtil.isBlank(src)) {
             ConsoleLog.println("播放地址不能为空");
@@ -42,9 +54,7 @@ public class MediaPlayerProxy {
     }
 
     public void pause(boolean pause) {
-        if (mediaPlayer.getStatus() == IMediaPlayer.Status.PLAYING) {
-            mediaPlayer.pause(pause);
-        }
+        mediaPlayer.pause(pause);
     }
 
     public void volume(double volume) {
