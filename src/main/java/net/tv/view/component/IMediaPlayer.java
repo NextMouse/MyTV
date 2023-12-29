@@ -10,6 +10,8 @@ public interface IMediaPlayer {
         PLAYING, // 播放中
         STOPPED, // 停止中
         PAUSED,  // 暂停中
+        DESTROYING, // 正在销毁
+        DESTROYED,  //已销毁
     }
 
     JComponent getJComponentPanel();

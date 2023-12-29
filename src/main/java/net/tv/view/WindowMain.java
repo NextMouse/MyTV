@@ -4,8 +4,8 @@ import cn.hutool.core.util.StrUtil;
 import net.tv.service.PlaylistService;
 import net.tv.view.arm.ConsoleLog;
 import net.tv.view.arm.GodHand;
-import net.tv.view.component.IMediaPlayer;
 import net.tv.view.component.Icons;
+import net.tv.view.component.impl.MediaPlayerProxy;
 import net.tv.view.config.SystemConfig;
 import net.tv.view.config.ThemeConfig;
 import net.tv.view.panel.root.RootPanel;
@@ -31,8 +31,6 @@ public class WindowMain extends JFrame {
 
         // 获取屏幕大小
         final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-
-        // 设置大小
         setSize(new Dimension((int) (screenSize.getWidth() / 1.5), (int) (screenSize.getHeight() / 1.5)));
         setMinimumSize(new Dimension((int) (screenSize.getWidth() / 4), (int) (screenSize.getHeight() / 4)));
         // 设置位置
@@ -45,7 +43,7 @@ public class WindowMain extends JFrame {
             public void windowClosing(WindowEvent e) {
                 try {
                     GodHand.exec(GodHand.K.SystemConfig, SystemConfig::save);
-                    GodHand.exec(GodHand.K.IMediaPlayer, IMediaPlayer::refresh);
+                    GodHand.exec(GodHand.K.MediaPlayerProxy, MediaPlayerProxy::release);
                 } catch (Exception ex) {
                     // ignore
                 }
@@ -66,9 +64,7 @@ public class WindowMain extends JFrame {
         root.setBorder(R.DEFAULT_BORDER);
         root.add(RootPanel.instance(), BorderLayout.CENTER);
         add(root, BorderLayout.CENTER);
-        EventQueue.invokeLater(() -> {
-            setVisible(true);
-        });
+        EventQueue.invokeLater(() -> setVisible(true));
     }
 
     class MouseDraggedSizeListener extends MouseMotionAdapter {

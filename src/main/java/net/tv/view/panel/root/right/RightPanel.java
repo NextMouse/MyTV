@@ -9,7 +9,11 @@ import net.tv.util.SearchSourceTvUtil;
 import net.tv.util.SearchTvUtil;
 import net.tv.view.arm.ConsoleLog;
 import net.tv.view.arm.GodHand;
-import net.tv.view.component.*;
+import net.tv.view.component.CustomizeComponent;
+import net.tv.view.component.CustomizeList;
+import net.tv.view.component.Icons;
+import net.tv.view.component.SimpleButton;
+import net.tv.view.component.impl.MediaPlayerProxy;
 import net.tv.view.panel.root.center.VideoManagerToolBar;
 
 import javax.swing.*;
@@ -34,7 +38,8 @@ public class RightPanel extends JPanel {
 
     private JTextField searchField;
     private final JButton nextSearchButton;
-
+    private final JButton moreButton = new JButton("更 多");
+    ;
     private final CustomizeList<SearchResultPanel> searchResultListPanel1;
     private final CustomizeList<SearchResultPanel> searchResultListPanel2;
 
@@ -65,15 +70,15 @@ public class RightPanel extends JPanel {
 
 
     private JButton getNextSearchButton() {
-        JButton button = new JButton("更 多");
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setVisible(false);
-        button.addActionListener(e -> AsyncUtil.exec(() -> {
+        moreButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        moreButton.setVisible(false);
+        moreButton.addActionListener(e -> AsyncUtil.exec(() -> {
             try {
                 int selectedIndex = searchResultListPanel1.getSelectedIndex();
                 searchPageIndex++;
                 List<PlayViewItem> playViewItems = SearchTvUtil.search(searchPageIndex, searchValue);
                 addResultList(searchResultListPanel1, playViewItems);
+                nextSearchButton.setVisible(playViewItems.size() >= 30);
                 // 重新指定选中位置
                 if (selectedIndex != -1) {
                     searchResultListPanel1.setSelectedIndex(selectedIndex);
@@ -82,7 +87,7 @@ public class RightPanel extends JPanel {
                 ConsoleLog.println(ex.getMessage());
             }
         }));
-        return button;
+        return moreButton;
     }
 
     private int searchPageIndex = 1;
@@ -95,9 +100,11 @@ public class RightPanel extends JPanel {
 
         // 搜索框
         searchField = new JTextField();
+        searchField.setPreferredSize(new Dimension(110, searchField.getHeight()));
         toolBar.add(searchField);
 
         SimpleButton button = new SimpleButton("搜索", Icons.Standard.SEARCH, (e, btn) -> {
+            this.moreButton.setVisible(false);
             searchValue = searchField.getText();
             if (StrUtil.isNotBlank(searchValue)) {
                 final ExecutorService executor = Executors.newFixedThreadPool(2);
@@ -125,7 +132,6 @@ public class RightPanel extends JPanel {
                 executor.shutdown();
             }
         });
-
         // 搜索按钮
         toolBar.add(button);
 
@@ -161,7 +167,7 @@ public class RightPanel extends JPanel {
                     mediaLink.setCaretPosition(0);
                 });
                 // 搜索结果只播放
-                GodHand.<IMediaPlayer>exec(GodHand.K.IMediaPlayer, player -> {
+                GodHand.<MediaPlayerProxy>exec(GodHand.K.MediaPlayerProxy, player -> {
                     player.play(selectedItem.getPlayViewItem().getMediaUrl());
                 });
             });
@@ -172,8 +178,9 @@ public class RightPanel extends JPanel {
             popupMenu.add(menuItem);
             menuItem.addActionListener(e -> {
                 try {
+                    PlayViewItem playViewItem = item.getPlayViewItem();
                     Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                    clipboard.setContents(new StringSelection(JSONUtil.toJsonPrettyStr(item.getPlayViewItem())), null);
+                    clipboard.setContents(new StringSelection(playViewItem.getPlayItem().toString()), null);
                     ConsoleLog.println("复制成功！");
                 } catch (Exception ex) {
                     // ignore

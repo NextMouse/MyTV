@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpStatus;
 import net.tv.m3u.Constants;
 import net.tv.m3u.M3uParser;
 import net.tv.m3u.PlayItem;
@@ -11,7 +12,11 @@ import net.tv.m3u.Playlist;
 import net.tv.service.model.PlayItemAvailable;
 import net.tv.service.model.PlayViewItem;
 import net.tv.service.orm.PlayViewItemDao;
+import net.tv.util.HttpClient;
 import net.tv.view.arm.ConsoleLog;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -32,6 +37,25 @@ public class PlaylistService {
             ConsoleLog.println("解析完成：{}个节目", CollectionUtil.size(playlist.getItems()));
             if (CollectionUtil.isEmpty(playlist.getItems())) return;
             playViewItemDao.batchInsert(getPlayViewItemList(playlist.getItems()));
+        } catch (Exception e) {
+            ConsoleLog.println(e);
+        }
+    }
+
+    public void readHttp(String httpUrl) {
+        try {
+            ConsoleLog.println("解析：{}", httpUrl);
+            final OkHttpClient httpClient = HttpClient.getProxyClient();
+            Request request = new Request.Builder().url(httpUrl).build();
+            Response response = httpClient.newCall(request).execute();
+            if (response.body() != null && response.code() == HttpStatus.HTTP_OK) {
+                Playlist playlist = m3uParser.parse(response.body().byteStream());
+                ConsoleLog.println("解析完成：{}个节目", CollectionUtil.size(playlist.getItems()));
+                if (CollectionUtil.isEmpty(playlist.getItems())) return;
+                playViewItemDao.batchInsert(getPlayViewItemList(playlist.getItems()));
+            } else {
+                ConsoleLog.println("解析失败:{}", response.code());
+            }
         } catch (Exception e) {
             ConsoleLog.println(e);
         }

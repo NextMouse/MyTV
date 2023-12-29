@@ -17,11 +17,16 @@ public final class AsyncUtil {
     }
 
     public static void exec(Runnable runnable, int timeout, TimeUnit unit) {
+        exec(runnable, timeout, unit, null);
+    }
+
+    public static void exec(Runnable runnable, int timeout, TimeUnit unit, Runnable cancelCallback) {
         Future<?> future = executor.submit(runnable);
         try {
             future.get(timeout, unit);
         } catch (Exception ex) {
             future.cancel(true);
+            if (cancelCallback != null) cancelCallback.run();
         }
     }
 

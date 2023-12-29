@@ -66,6 +66,7 @@ public class GroupListPanel extends ScrollListAndTitlePanel<GroupListPanel.Group
             super("  " + text);
             setOpaque(true);
         }
+
         public String getTrimText() {
             return super.getText().trim();
         }
@@ -83,5 +84,20 @@ public class GroupListPanel extends ScrollListAndTitlePanel<GroupListPanel.Group
             menuItem.addActionListener(e -> new ChangeGroupTitlePopup().open(item.getTrimText()));
             popupMenu.show(mouseEvent.getComponent(), mouseEvent.getX(), mouseEvent.getY());
         };
+    }
+
+    public void showGroupPanel() {
+        GodHand.<PlaylistService>exec(GodHand.K.PlaylistService, service -> {
+            List<String> groupTitleList = service.getByGroupTitle();
+            if (CollectionUtil.isNotEmpty(groupTitleList)) {
+                GodHand.<GroupListPanel>exec(GodHand.K.GroupListPanel, groupListPanel -> {
+                    if (groupListPanel.customizeList.getSelectedValue() != null) {
+                        groupListPanel.refresh(groupListPanel.customizeList.getSelectedValue().getTrimText());
+                    } else {
+                        groupListPanel.refresh(null);
+                    }
+                });
+            }
+        });
     }
 }

@@ -9,12 +9,13 @@ public final class GodHand {
     public enum K {
         WindowMain,
         MediaLinkTextFiled,
-        IMediaPlayer,
+        MediaPlayerProxy,
         GroupListPanel,
         GroupItemListPanel,
         VideoManagerToolBar,
         SystemConfig,
         PlaylistService,
+        VideoPanel,
     }
 
     /**
