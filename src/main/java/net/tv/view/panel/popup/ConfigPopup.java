@@ -49,7 +49,7 @@ public class ConfigPopup extends JDialog {
 
         JPanel root = new JPanel();
 
-        root.setLayout(new GridLayout(5, 1, 5, 5));
+        root.setLayout(new GridLayout(5, 1, 3, 5));
 
         root.add(getThemeBox());
         root.add(getMediaRadio());
@@ -101,6 +101,7 @@ public class ConfigPopup extends JDialog {
     private JPanel getProxyBox() {
         this.proxyHostname = new FieldItem("图片代理", "代理地址");
         this.proxyPort = new FieldItem(null, "端口号");
+        this.proxyPort.setPreferredSize(new Dimension(100, this.proxyPort.getHeight()));
         this.proxyHostname.add(this.proxyPort, BorderLayout.EAST);
         return this.proxyHostname;
     }

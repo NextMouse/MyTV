@@ -78,6 +78,7 @@ public class RightPanel extends JPanel {
                 searchPageIndex++;
                 List<PlayViewItem> playViewItems = SearchTvUtil.search(searchPageIndex, searchValue);
                 addResultList(searchResultListPanel1, playViewItems);
+                nextSearchButton.setVisible(playViewItems.size() >= 30);
                 // 重新指定选中位置
                 if (selectedIndex != -1) {
                     searchResultListPanel1.setSelectedIndex(selectedIndex);
@@ -99,6 +100,7 @@ public class RightPanel extends JPanel {
 
         // 搜索框
         searchField = new JTextField();
+        searchField.setPreferredSize(new Dimension(110, searchField.getHeight()));
         toolBar.add(searchField);
 
         SimpleButton button = new SimpleButton("搜索", Icons.Standard.SEARCH, (e, btn) -> {
@@ -130,7 +132,6 @@ public class RightPanel extends JPanel {
                 executor.shutdown();
             }
         });
-
         // 搜索按钮
         toolBar.add(button);
 

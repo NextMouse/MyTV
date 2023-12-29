@@ -34,7 +34,12 @@ public class M3uParser {
         Map<AttrKey, String> attributes = parseExtInfoAttrs(extInfInfo.getRawAttrs());
         extInfInfo.setAttributes(attributes);
         if (notBlankLines.size() > 1) {
-            playItem.getMediaList().add(notBlankLines.get(1));
+            for (int i = 1; i < notBlankLines.size(); i++) {
+                String line2 = notBlankLines.get(i);
+                if (MEDIA_REGEX.matcher(line2).matches()) {
+                    playItem.getMediaList().add(line2);
+                }
+            }
         }
         return playItem;
     }
