@@ -37,19 +37,6 @@ public class WindowMain extends JFrame {
         setLocationRelativeTo(null);
         // 设置布局
         setLayout(new BorderLayout());
-        // 添加关闭监听
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                try {
-                    GodHand.exec(GodHand.K.SystemConfig, SystemConfig::save);
-                    GodHand.exec(GodHand.K.MediaPlayerProxy, MediaPlayerProxy::release);
-                } catch (Exception ex) {
-                    // ignore
-                }
-                System.exit(0);
-            }
-        });
         // 去掉系统窗体
         setUndecorated(true);
         // 设置图标

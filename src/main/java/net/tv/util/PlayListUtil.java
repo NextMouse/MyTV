@@ -23,7 +23,7 @@ public class PlayListUtil {
                 for (int i = 0; i < minSize; i++) {
                     Tuple t1 = o1TupleList.get(i);
                     Tuple t2 = o2TupleList.get(i);
-                    if (t1.isNumber && t2.isNumber) {
+                    if (t1.isNumber && t2.isNumber && (t1.getNumber() != t2.getNumber())) {
                         return t1.getNumber() - t2.getNumber();
                     }
                     int comp = pinyinComparator.compare(t1.toString(), t2.toString());

@@ -1,5 +1,6 @@
 package net.tv.view.panel.root.top;
 
+import net.tv.view.component.impl.MediaPlayerProxy;
 import net.tv.view.config.SystemConfig;
 import net.tv.service.orm.SqliteHelper;
 import net.tv.view.WindowMain;
@@ -46,13 +47,17 @@ public class SystemMenuPanel extends JToolBar {
         }));
 
         buttonList.add(new SimpleButton(Icons.Standard.CLOSE, "关闭", (e, btn) -> {
-            try {
-                SqliteHelper.get().close();
-                GodHand.exec(GodHand.K.SystemConfig, SystemConfig::save);
-            } catch (Exception ex) {
-                // ignore
+            int isClose = JOptionPane.showConfirmDialog(GodHand.<JFrame>get(GodHand.K.WindowMain), "退出后节目列表将清空，确定退出吗?", "提示", JOptionPane.YES_NO_OPTION);
+            if (isClose == JOptionPane.YES_OPTION) {
+                try {
+                    SqliteHelper.get().close();
+                    GodHand.exec(GodHand.K.SystemConfig, SystemConfig::save);
+                    GodHand.exec(GodHand.K.MediaPlayerProxy, MediaPlayerProxy::release);
+                } catch (Exception ex) {
+                    // ignore
+                }
+                System.exit(0);
             }
-            System.exit(0);
         }));
 
     }
