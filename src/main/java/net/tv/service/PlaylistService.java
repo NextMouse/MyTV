@@ -13,6 +13,7 @@ import net.tv.service.model.PlayItemAvailable;
 import net.tv.service.model.PlayViewItem;
 import net.tv.service.orm.PlayViewItemDao;
 import net.tv.util.HttpClient;
+import net.tv.util.PlayListUtil;
 import net.tv.view.arm.ConsoleLog;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -115,13 +116,14 @@ public class PlaylistService {
         return -1;
     }
 
-    public void saveToFile(File file) {
+    public void saveToFile(File file, boolean sort) {
         if (file == null) {
             ConsoleLog.println("请选择文件");
             return;
         }
         try (FileWriter fos = new FileWriter(file)) {
             List<PlayViewItem> playViewItemList = playViewItemDao.queryAll();
+            if (sort) PlayListUtil.sort(playViewItemList);
             fos.write(Constants.EXTM3U);
             int i = 1;
             for (PlayViewItem playViewItem : playViewItemList) {

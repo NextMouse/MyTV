@@ -61,8 +61,14 @@ public class FileMenuToolBar extends JToolBar {
                         selectedFile = new File(chooser.getCurrentDirectory(), fileName + ".m3u");
                     }
                     final File saveFile = selectedFile;
-                    GodHand.<PlaylistService>exec(GodHand.K.PlaylistService,
-                            playListService -> playListService.saveToFile(saveFile));
+                    int isSort = JOptionPane.showConfirmDialog(GodHand.<JFrame>get(GodHand.K.WindowMain), "是否按照拼音顺序排序?", "导出节目表单", JOptionPane.YES_NO_OPTION);
+                    if (isSort == JOptionPane.YES_OPTION) {
+                        GodHand.<PlaylistService>exec(GodHand.K.PlaylistService,
+                                playListService -> playListService.saveToFile(saveFile, true));
+                    } else {
+                        GodHand.<PlaylistService>exec(GodHand.K.PlaylistService,
+                                playListService -> playListService.saveToFile(saveFile, false));
+                    }
                 } catch (Exception ex) {
                     ConsoleLog.println(ex);
                 }
