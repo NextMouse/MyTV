@@ -53,6 +53,7 @@ public class OpenHttpFilePopup extends JDialog {
                 service.readHttp(filePath);
                 GodHand.exec(GodHand.K.GroupListPanel, GroupListPanel::showGroupPanel);
             });
+            close();
         });
 
         setSize(R.DIALOG_SIZE);
